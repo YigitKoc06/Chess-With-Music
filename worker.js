@@ -64,7 +64,13 @@ function getPieceValue(piece, x, y) {
 }
 
 function minimax(g, depth, alpha, beta, isMaximizingPlayer) {
-    if (depth === 0 || g.game_over()) {
+    if (g.in_checkmate()) {
+        return isMaximizingPlayer ? -99999 + (10 - depth) : 99999 - (10 - depth);
+    }
+    if (g.in_draw() || g.in_stalemate() || g.in_threefold_repetition()) {
+        return 0;
+    }
+    if (depth === 0) {
         return evaluateBoard(g);
     }
 
