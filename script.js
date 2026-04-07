@@ -34,7 +34,11 @@ let isLoopingSingle = false;
 let currentTrackIndex = 0;
 
 const playlist = [
-    { title: "Forgotten Dreams", src: "forgotten dreams  dark ambient music mix.mp3" }
+    { title: "Below Zero", src: "Below Zero.mp3" },
+    { title: "New Moon", src: "New Moon.mp3" },
+    { title: "On It Goes", src: "On It Goes.mp3" },
+    { title: "Sebastian Kamae - Solitude", src: "Sebastian Kamae - Solitude.mp3" },
+    { title: "Swept Away", src: "Swept Away.mp3" }
 ];
 
 // Initialize board configuration
