@@ -104,7 +104,7 @@ function handleSquareTap(square) {
                 updateStatus();
                 updateMoveHistoryUI();
                 botStatus.innerText = "Düşünüyor...";
-                setTimeout(makeBotMove, 50);
+                setTimeout(makeBotMove, 300);
                 return;
             }
         }
@@ -380,7 +380,7 @@ document.getElementById('resetBtn').addEventListener('click', () => {
     showToast("Oyun sıfırlandı.");
     if (playerColor === 'b') {
         botStatus.innerText = "Düşünüyor...";
-        window.setTimeout(makeBotMove, 50);
+        window.setTimeout(makeBotMove, 300);
     }
 });
 
@@ -407,7 +407,7 @@ document.getElementById('switchSideBtn').addEventListener('click', () => {
     
     if (playerColor === 'b') {
         botStatus.innerText = "Düşünüyor...";
-        window.setTimeout(makeBotMove, 50);
+        window.setTimeout(makeBotMove, 300);
     }
 });
 
@@ -445,7 +445,7 @@ function onDrop(source, target) {
 
     // Bot'un oynaması için bekle
     botStatus.innerText = "Düşünüyor...";
-    window.setTimeout(makeBotMove, 50);
+    window.setTimeout(makeBotMove, 300);
 }
 
 // Tahtayı motorun hamlelerinden sonra güncelle
@@ -547,7 +547,7 @@ document.getElementById('gameOverReplay').addEventListener('click', () => {
     showToast('Oyun yeniden başladı!');
     if (playerColor === 'b') {
         botStatus.innerText = 'Düşünüyor...';
-        window.setTimeout(makeBotMove, 50);
+        window.setTimeout(makeBotMove, 300);
     }
 });
 
@@ -602,7 +602,7 @@ document.getElementById('gameOverSwitch').addEventListener('click', () => {
     
     if (playerColor === 'b') {
         botStatus.innerText = 'Düşünüyor...';
-        window.setTimeout(makeBotMove, 50);
+        window.setTimeout(makeBotMove, 300);
     }
 });
 
