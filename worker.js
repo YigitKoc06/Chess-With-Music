@@ -28,13 +28,55 @@ const knightEval = [
     [-2.5, -2.0, -1.5, -1.5, -1.5, -1.5, -2.0, -2.5]
 ];
 
-// Basit bir açılış kütüphanesi (İlk hamleler için)
+// Genişletilmiş açılış kütüphanesi — ilk 4 hamleye kadar kapsar
+// Anahtar: hamle geçmişi virgülle birleştirilmiş, değer: olası yanıtlar
 const openingBook = {
-    '0': ['e4', 'd4', 'c4'], // Beyaz için ilk hamleler
-    'e4': ['c5', 'e5', 'e6', 'c6'], // Siyahın e4'e yanıtları
-    'd4': ['d5', 'Nf6', 'e6'], // Siyahın d4'e yanıtları
-    'c4': ['e5', 'c5', 'Nf6'], // Siyahın c4'e yanıtları
-    'Nf3': ['d5', 'Nf6', 'c5'] // Siyahın Nf3'e yanıtları
+    // === BEYAZ İLK HAMLE ===
+    '': ['e4', 'd4', 'Nf3', 'c4'],
+
+    // === SİYAH YANITLARI ===
+    'e4': ['e5', 'c5', 'e6', 'c6', 'Nf6', 'd5'],
+    'd4': ['d5', 'Nf6', 'e6', 'f5'],
+    'Nf3': ['d5', 'Nf6', 'c5', 'g6'],
+    'c4': ['e5', 'Nf6', 'c5', 'e6'],
+
+    // === BEYAZ 2. HAMLE ===
+    'e4,e5': ['Nf3', 'Bc4', 'f4', 'Nc3'],
+    'e4,c5': ['Nf3', 'Nc3', 'c3', 'd4'],
+    'e4,e6': ['d4', 'Nf3'],
+    'e4,c6': ['d4', 'Nf3', 'Nc3'],
+    'e4,Nf6': ['e5', 'Nc3', 'd3'],
+    'e4,d5': ['exd5', 'e5', 'Nc3'],
+    'd4,d5': ['c4', 'Nf3', 'Bf4'],
+    'd4,Nf6': ['c4', 'Nf3', 'Bg5'],
+    'd4,e6': ['c4', 'Nf3', 'e4'],
+    'd4,f5': ['c4', 'Nf3', 'g3'],
+    'Nf3,d5': ['d4', 'g3', 'c4'],
+    'Nf3,Nf6': ['d4', 'c4', 'g3'],
+    'c4,e5': ['Nc3', 'g3', 'Nf3'],
+    'c4,Nf6': ['Nc3', 'd4', 'Nf3'],
+
+    // === SİYAH 2. HAMLE ===
+    'e4,e5,Nf3': ['Nc6', 'Nf6', 'd6'],
+    'e4,e5,Bc4': ['Nf6', 'Bc5', 'Nc6'],
+    'e4,c5,Nf3': ['d6', 'Nc6', 'e6'],
+    'e4,c5,d4': ['cxd4'],
+    'e4,e6,d4': ['d5'],
+    'e4,c6,d4': ['d5'],
+    'd4,d5,c4': ['e6', 'c6', 'dxc4'],
+    'd4,d5,Nf3': ['Nf6', 'e6', 'c6'],
+    'd4,Nf6,c4': ['e6', 'g6', 'c5'],
+    'd4,Nf6,Nf3': ['e6', 'd5', 'g6'],
+
+    // === BEYAZ 3. HAMLE ===
+    'e4,e5,Nf3,Nc6': ['Bb5', 'Bc4', 'd4'],
+    'e4,e5,Nf3,Nf6': ['Nxe5', 'Nc3', 'Bc4'],
+    'e4,c5,Nf3,d6': ['d4', 'Bb5+', 'c3'],
+    'e4,c5,Nf3,Nc6': ['d4', 'Bb5', 'c3'],
+    'd4,d5,c4,e6': ['Nc3', 'Nf3'],
+    'd4,d5,c4,c6': ['Nf3', 'Nc3'],
+    'd4,Nf6,c4,e6': ['Nc3', 'Nf3', 'g3'],
+    'd4,Nf6,c4,g6': ['Nc3', 'Nf3']
 };
 
 function evaluateBoard(g) {
@@ -63,6 +105,23 @@ function getPieceValue(piece, x, y) {
     return piece.color === 'w' ? val : -val;
 }
 
+// Fast move ordering using SAN strings (no expensive verbose calls)
+// Captures ('x' in SAN) and checks ('+') are prioritized
+function orderMoves(g) {
+    const moves = g.moves();
+    // Simple & fast: captures first, then checks, then the rest
+    const captures = [];
+    const checks = [];
+    const others = [];
+    for (let i = 0; i < moves.length; i++) {
+        const m = moves[i];
+        if (m.indexOf('x') !== -1) captures.push(m);
+        else if (m.indexOf('+') !== -1) checks.push(m);
+        else others.push(m);
+    }
+    return captures.concat(checks, others);
+}
+
 function minimax(g, depth, alpha, beta, isMaximizingPlayer) {
     if (g.in_checkmate()) {
         return isMaximizingPlayer ? -99999 + (10 - depth) : 99999 - (10 - depth);
@@ -74,13 +133,13 @@ function minimax(g, depth, alpha, beta, isMaximizingPlayer) {
         return evaluateBoard(g);
     }
 
-    const possibleMoves = g.moves();
+    const possibleMoves = orderMoves(g);
 
     if (isMaximizingPlayer) {
         let bestVal = -Infinity;
         for (let i = 0; i < possibleMoves.length; i++) {
             g.move(possibleMoves[i]);
-            bestVal = Math.max(bestVal, minimax(g, depth - 1, alpha, beta, !isMaximizingPlayer));
+            bestVal = Math.max(bestVal, minimax(g, depth - 1, alpha, beta, false));
             g.undo();
             alpha = Math.max(alpha, bestVal);
             if (beta <= alpha) break;
@@ -90,7 +149,7 @@ function minimax(g, depth, alpha, beta, isMaximizingPlayer) {
         let bestVal = Infinity;
         for (let i = 0; i < possibleMoves.length; i++) {
             g.move(possibleMoves[i]);
-            bestVal = Math.min(bestVal, minimax(g, depth - 1, alpha, beta, !isMaximizingPlayer));
+            bestVal = Math.min(bestVal, minimax(g, depth - 1, alpha, beta, true));
             g.undo();
             beta = Math.min(beta, bestVal);
             if (beta <= alpha) break;
@@ -100,30 +159,42 @@ function minimax(g, depth, alpha, beta, isMaximizingPlayer) {
 }
 
 function getBestMove(g, depth, isBotWhite, history) {
-    let possibleMoves = g.moves({ verbose: true });
-    possibleMoves.sort(() => Math.random() - 0.5);
-
-    // Açılış kütüphanesi kontrolü
-    if (history.length === 0) {
-        // Bot beyaz oynuyor, ilk hamlesi
-        const ops = openingBook['0'];
-        return ops[Math.floor(Math.random() * ops.length)];
-    } else if (history.length === 1) {
-        // Bot siyah oynuyor, beyazın ilk hamlesine yanıt
-        const ops = openingBook[history[0]];
-        if (ops) {
-            return ops[Math.floor(Math.random() * ops.length)];
+    // Açılış kütüphanesi kontrolü — ilk birkaç hamle için anında yanıt
+    const key = history.join(',');
+    const bookMoves = openingBook[key];
+    if (bookMoves) {
+        // Verify the book move is legal in current position
+        const pick = bookMoves[Math.floor(Math.random() * bookMoves.length)];
+        const testMove = g.move(pick);
+        if (testMove) {
+            g.undo();
+            return pick;
         }
+        g.undo(); // safety
     }
 
+    let possibleMoves = g.moves({ verbose: true });
+
+    // Shuffle for variety, then sort with move ordering
+    possibleMoves.sort(() => Math.random() - 0.5);
+
+    // Captures first at root level
+    possibleMoves.sort((a, b) => {
+        const aScore = a.captured ? 1 : 0;
+        const bScore = b.captured ? 1 : 0;
+        return bScore - aScore;
+    });
+
+    let alpha = -Infinity;
+    let beta = Infinity;
     let bestValue = isBotWhite ? -Infinity : Infinity; 
-    let bestMove = null;
+    let bestMove = possibleMoves[0]?.san || null;
 
     for (let i = 0; i < possibleMoves.length; i++) {
         const move = possibleMoves[i];
         g.move(move.san);
         
-        let boardValue = minimax(g, depth - 1, -Infinity, Infinity, !isBotWhite);
+        let boardValue = minimax(g, depth - 1, alpha, beta, !isBotWhite);
         
         g.undo();
 
@@ -132,11 +203,13 @@ function getBestMove(g, depth, isBotWhite, history) {
                 bestValue = boardValue;
                 bestMove = move.san;
             }
+            alpha = Math.max(alpha, bestValue);
         } else {
             if (boardValue < bestValue) {
                 bestValue = boardValue;
                 bestMove = move.san;
             }
+            beta = Math.min(beta, bestValue);
         }
     }
 
@@ -144,6 +217,9 @@ function getBestMove(g, depth, isBotWhite, history) {
 }
 
 onmessage = function(e) {
+    // Pre-warm message: just load chess.js, don't calculate
+    if (e.data.type === 'warmup') { new Chess(); return; }
+
     const { fen, depth, isBotWhite, history } = e.data;
     const g = new Chess(fen);
     

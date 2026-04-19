@@ -458,6 +458,213 @@ body {
     100% { transform: scale(1); opacity: 0.8; }
 }
 
+/* ============================================
+   GAME OVER MODAL (Chess.com style)
+   ============================================ */
+.game-over-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1500;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+}
+
+.game-over-overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.game-over-modal {
+    background: linear-gradient(135deg, rgba(18, 18, 25, 0.95), rgba(28, 28, 40, 0.92));
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 20px;
+    padding: 2.5rem 3rem;
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+    box-shadow:
+        0 24px 80px rgba(0, 0, 0, 0.6),
+        0 0 60px rgba(45, 201, 255, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    transform: scale(0.8) translateY(30px);
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.game-over-overlay.visible .game-over-modal {
+    transform: scale(1) translateY(0);
+}
+
+/* Result Icon */
+.game-over-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.2rem;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    animation: iconPulse 2s ease-in-out infinite;
+}
+
+.game-over-icon.win {
+    background: linear-gradient(135deg, #f5af19, #f12711);
+    color: #fff;
+    box-shadow: 0 8px 30px rgba(245, 175, 25, 0.35);
+}
+
+.game-over-icon.lose {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+    box-shadow: 0 8px 30px rgba(118, 75, 162, 0.35);
+}
+
+.game-over-icon.draw {
+    background: linear-gradient(135deg, #606060, #8e8e8e);
+    color: #fff;
+    box-shadow: 0 8px 30px rgba(100, 100, 100, 0.35);
+}
+
+@keyframes iconPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+}
+
+/* Title & Subtitle */
+.game-over-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+}
+
+.game-over-subtitle {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+}
+
+/* Action Buttons */
+.game-over-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.game-over-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 0.85rem 1.5rem;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    letter-spacing: 0.01em;
+}
+
+.game-over-btn i {
+    font-size: 1.1rem;
+}
+
+/* Replay - Primary / Accent */
+.replay-btn {
+    background: linear-gradient(135deg, var(--accent), #1aa3d4);
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(45, 201, 255, 0.3);
+}
+
+.replay-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(45, 201, 255, 0.45);
+    filter: brightness(1.1);
+}
+
+/* Difficulty - Secondary */
+.difficulty-btn {
+    background: rgba(255, 255, 255, 0.07);
+    color: var(--text-primary);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.difficulty-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-2px);
+}
+
+/* Switch Side - Secondary */
+.switch-btn {
+    background: rgba(255, 255, 255, 0.07);
+    color: var(--text-primary);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.switch-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-2px);
+}
+
+/* Difficulty Dropdown inside modal */
+.game-over-difficulty-select {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    animation: fadeSlideIn 0.3s ease;
+}
+
+.game-over-difficulty-select label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.game-over-difficulty-select select {
+    background: var(--bg-main);
+    color: var(--text-primary);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    cursor: pointer;
+}
+
+@keyframes fadeSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* Custom Scrollbar for Move History */
 .move-history::-webkit-scrollbar {
     width: 6px;
@@ -736,6 +943,31 @@ body {
         padding: 0.75rem 1.5rem;
         font-size: 0.9rem;
         max-width: 90%;
+    }
+
+    /* Game Over Modal - Phone */
+    .game-over-modal {
+        padding: 2rem 1.5rem;
+        border-radius: 16px;
+    }
+
+    .game-over-icon {
+        width: 64px;
+        height: 64px;
+        font-size: 1.6rem;
+    }
+
+    .game-over-title {
+        font-size: 1.5rem;
+    }
+
+    .game-over-subtitle {
+        font-size: 0.9rem;
+    }
+
+    .game-over-btn {
+        padding: 0.75rem 1.2rem;
+        font-size: 0.9rem;
     }
 }
 

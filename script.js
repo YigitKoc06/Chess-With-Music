@@ -13,6 +13,12 @@ const botStatus = document.getElementById('botStatus');
 const toastEl = document.getElementById('toast');
 const moveHistoryEl = document.getElementById('moveHistory');
 
+// Game Over Modal Elements
+const gameOverOverlay = document.getElementById('gameOverOverlay');
+const gameOverIcon = document.getElementById('gameOverIcon');
+const gameOverTitle = document.getElementById('gameOverTitle');
+const gameOverSubtitle = document.getElementById('gameOverSubtitle');
+
 // Music Player Elements
 const playPauseBtn = document.getElementById('playPauseBtn');
 const prevTrackBtn = document.getElementById('prevTrackBtn');
@@ -98,7 +104,7 @@ function handleSquareTap(square) {
                 updateStatus();
                 updateMoveHistoryUI();
                 botStatus.innerText = "Düşünüyor...";
-                setTimeout(makeBotMove, 250);
+                setTimeout(makeBotMove, 50);
                 return;
             }
         }
@@ -364,6 +370,7 @@ document.getElementById('inGameDifficulty').addEventListener('change', (e) => {
 });
 
 document.getElementById('resetBtn').addEventListener('click', () => {
+    hideGameOverModal();
     game.reset();
     board.start();
     clearHighlights();
@@ -373,11 +380,12 @@ document.getElementById('resetBtn').addEventListener('click', () => {
     showToast("Oyun sıfırlandı.");
     if (playerColor === 'b') {
         botStatus.innerText = "Düşünüyor...";
-        window.setTimeout(makeBotMove, 250);
+        window.setTimeout(makeBotMove, 50);
     }
 });
 
 document.getElementById('switchSideBtn').addEventListener('click', () => {
+    hideGameOverModal();
     playerColor = playerColor === 'w' ? 'b' : 'w';
     board.orientation(playerColor === 'w' ? 'white' : 'black');
     
@@ -399,7 +407,7 @@ document.getElementById('switchSideBtn').addEventListener('click', () => {
     
     if (playerColor === 'b') {
         botStatus.innerText = "Düşünüyor...";
-        window.setTimeout(makeBotMove, 250);
+        window.setTimeout(makeBotMove, 50);
     }
 });
 
@@ -437,7 +445,7 @@ function onDrop(source, target) {
 
     // Bot'un oynaması için bekle
     botStatus.innerText = "Düşünüyor...";
-    window.setTimeout(makeBotMove, 250);
+    window.setTimeout(makeBotMove, 50);
 }
 
 // Tahtayı motorun hamlelerinden sonra güncelle
@@ -457,10 +465,20 @@ function updateStatus() {
         status = `Oyun Bitti, ${moveColor} mat oldu.`;
         showToast(status);
         botStatus.innerText = "Oyun Bitti";
+        // Determine winner: the side that just got mated is game.turn()
+        const loserColor = game.turn();
+        if (loserColor === playerColor) {
+            // Player lost
+            showGameOverModal('lose');
+        } else {
+            // Player won
+            showGameOverModal('win');
+        }
     } else if (game.in_draw()) {
         status = 'Oyun Bitti, Berabere (Draw)';
         showToast(status);
         botStatus.innerText = "Oyun Bitti";
+        showGameOverModal('draw');
     } else {
         status = `${moveColor}'ın Sırası`;
         if (game.in_check()) {
@@ -469,6 +487,124 @@ function updateStatus() {
         botStatus.innerText = game.turn() !== playerColor ? "Düşünüyor..." : "Sıra sende";
     }
 }
+
+// --- GAME OVER MODAL ---
+
+function showGameOverModal(result) {
+    // result: 'win', 'lose', 'draw'
+    gameOverIcon.className = 'game-over-icon'; // reset classes
+
+    if (result === 'win') {
+        const winnerName = playerColor === 'w' ? 'Beyaz' : 'Siyah';
+        gameOverIcon.innerHTML = '<i class="fa-solid fa-crown"></i>';
+        gameOverIcon.classList.add('win');
+        gameOverTitle.textContent = `${winnerName} Kazandı!`;
+        gameOverSubtitle.textContent = 'Mat ile oyun sona erdi';
+    } else if (result === 'lose') {
+        const winnerName = playerColor === 'w' ? 'Siyah' : 'Beyaz';
+        gameOverIcon.innerHTML = '<i class="fa-solid fa-skull"></i>';
+        gameOverIcon.classList.add('lose');
+        gameOverTitle.textContent = `${winnerName} Kazandı!`;
+        gameOverSubtitle.textContent = 'Mat ile oyun sona erdi';
+    } else {
+        gameOverIcon.innerHTML = '<i class="fa-solid fa-handshake"></i>';
+        gameOverIcon.classList.add('draw');
+        gameOverTitle.textContent = 'Berabere!';
+        if (game.in_stalemate()) {
+            gameOverSubtitle.textContent = 'Pat — hamle yapılamıyor';
+        } else if (game.in_threefold_repetition()) {
+            gameOverSubtitle.textContent = 'Üç kere tekrar';
+        } else if (game.insufficient_material()) {
+            gameOverSubtitle.textContent = 'Yetersiz malzeme';
+        } else {
+            gameOverSubtitle.textContent = 'Oyun berabere bitti';
+        }
+    }
+
+    // Remove difficulty selector if it was previously added
+    const existingDiffSelect = gameOverOverlay.querySelector('.game-over-difficulty-select');
+    if (existingDiffSelect) existingDiffSelect.remove();
+
+    // Small delay so CSS transition plays
+    setTimeout(() => {
+        gameOverOverlay.classList.add('visible');
+    }, 600);
+}
+
+function hideGameOverModal() {
+    gameOverOverlay.classList.remove('visible');
+}
+
+// Game Over Modal button handlers
+document.getElementById('gameOverReplay').addEventListener('click', () => {
+    hideGameOverModal();
+    game.reset();
+    board.start();
+    clearHighlights();
+    updateStatus();
+    moveHistoryEl.innerHTML = '';
+    moveCount = 1;
+    showToast('Oyun yeniden başladı!');
+    if (playerColor === 'b') {
+        botStatus.innerText = 'Düşünüyor...';
+        window.setTimeout(makeBotMove, 50);
+    }
+});
+
+document.getElementById('gameOverDifficulty').addEventListener('click', () => {
+    const actionsDiv = document.querySelector('.game-over-actions');
+    // Toggle difficulty selector
+    let existing = actionsDiv.querySelector('.game-over-difficulty-select');
+    if (existing) {
+        existing.remove();
+        return;
+    }
+    const diffDiv = document.createElement('div');
+    diffDiv.className = 'game-over-difficulty-select';
+    diffDiv.innerHTML = `
+        <label>Zorluk:</label>
+        <select id="gameOverDiffSelect">
+            <option value="1" ${botDepth === 1 ? 'selected' : ''}>Kolay</option>
+            <option value="2" ${botDepth === 2 ? 'selected' : ''}>Orta</option>
+            <option value="3" ${botDepth === 3 ? 'selected' : ''}>Zor</option>
+            <option value="4" ${botDepth === 4 ? 'selected' : ''}>Çok Zor</option>
+        </select>
+    `;
+    actionsDiv.appendChild(diffDiv);
+    document.getElementById('gameOverDiffSelect').addEventListener('change', (e) => {
+        botDepth = parseInt(e.target.value);
+        document.getElementById('inGameDifficulty').value = botDepth;
+        difficultySelect.value = botDepth;
+        showToast(`Zorluk seviyesi güncellendi.`);
+    });
+});
+
+document.getElementById('gameOverSwitch').addEventListener('click', () => {
+    hideGameOverModal();
+    playerColor = playerColor === 'w' ? 'b' : 'w';
+    board.orientation(playerColor === 'w' ? 'white' : 'black');
+    
+    if (playerColor === 'w') {
+        document.querySelector('.user-info .details .name').innerText = 'Sen (Beyaz)';
+        document.querySelector('.bot-info .details .name').innerText = 'Bot (Siyah)';
+    } else {
+        document.querySelector('.user-info .details .name').innerText = 'Sen (Siyah)';
+        document.querySelector('.bot-info .details .name').innerText = 'Bot (Beyaz)';
+    }
+
+    game.reset();
+    board.start();
+    clearHighlights();
+    updateStatus();
+    moveHistoryEl.innerHTML = '';
+    moveCount = 1;
+    showToast(`Taraf değiştirildi. Sizin renginiz: ${playerColor === 'w' ? 'Beyaz' : 'Siyah'}`);
+    
+    if (playerColor === 'b') {
+        botStatus.innerText = 'Düşünüyor...';
+        window.setTimeout(makeBotMove, 50);
+    }
+});
 
 function showToast(msg) {
     toastEl.innerText = msg;
@@ -525,6 +661,8 @@ function findKingSquare(color) {
 // --- BOT LOGIC (Web Worker) ---
 
 const botWorker = new Worker('worker.js');
+// Pre-warm: force chess.js download now, not on first move
+botWorker.postMessage({ type: 'warmup' });
 
 botWorker.onmessage = function(e) {
     const bestMove = e.data;
