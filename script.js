@@ -53,6 +53,90 @@ const config = {
 
 board = Chessboard('myBoard', config);
 
+// --- Prevent mobile scroll when touching the board ---
+const boardEl = document.getElementById('myBoard');
+boardEl.addEventListener('touchmove', function(e) {
+    e.preventDefault();
+}, { passive: false });
+
+// --- TAP-TO-MOVE SYSTEM ---
+let selectedSquare = null;
+
+function clearHighlights() {
+    $('.square-55d63').removeClass('selected-square valid-move valid-capture');
+    selectedSquare = null;
+}
+
+function highlightMoves(square) {
+    // Get all valid moves from this square
+    const moves = game.moves({ square: square, verbose: true });
+    if (moves.length === 0) return;
+
+    // Highlight the selected piece's square
+    $('.square-' + square).addClass('selected-square');
+    selectedSquare = square;
+
+    // Highlight each valid target square
+    moves.forEach(function(move) {
+        if (move.captured) {
+            $('.square-' + move.to).addClass('valid-capture');
+        } else {
+            $('.square-' + move.to).addClass('valid-move');
+        }
+    });
+}
+
+// Click handler for tap-to-move
+$(document).on('click', '#myBoard .square-55d63', function() {
+    // Don't process taps when game is over or it's not player's turn
+    if (game.game_over()) return;
+    if (game.turn() !== playerColor) return;
+
+    const square = $(this).attr('data-square');
+    if (!square) return;
+
+    const piece = game.get(square);
+
+    // If a square is already selected
+    if (selectedSquare) {
+        // If clicking a valid move/capture square -> make the move
+        if ($(this).hasClass('valid-move') || $(this).hasClass('valid-capture')) {
+            const move = game.move({
+                from: selectedSquare,
+                to: square,
+                promotion: 'q'
+            });
+
+            if (move !== null) {
+                board.position(game.fen());
+                clearHighlights();
+                updateStatus();
+                updateMoveHistoryUI();
+                botStatus.innerText = "Düşünüyor...";
+                window.setTimeout(makeBotMove, 250);
+                return;
+            }
+        }
+
+        // If clicking on another own piece -> switch selection
+        if (piece && piece.color === playerColor) {
+            clearHighlights();
+            highlightMoves(square);
+            return;
+        }
+
+        // Otherwise clear selection
+        clearHighlights();
+        return;
+    }
+
+    // No square selected yet: if clicking on own piece, select it
+    if (piece && piece.color === playerColor) {
+        clearHighlights();
+        highlightMoves(square);
+    }
+});
+
 // --- Event Listeners ---
 
 startGameBtn.addEventListener('click', () => {
@@ -204,6 +288,7 @@ document.getElementById('inGameDifficulty').addEventListener('change', (e) => {
 document.getElementById('resetBtn').addEventListener('click', () => {
     game.reset();
     board.start();
+    clearHighlights();
     updateStatus();
     moveHistoryEl.innerHTML = '';
     moveCount = 1;
@@ -228,6 +313,7 @@ document.getElementById('switchSideBtn').addEventListener('click', () => {
 
     game.reset();
     board.start();
+    clearHighlights();
     updateStatus();
     moveHistoryEl.innerHTML = '';
     moveCount = 1;
@@ -243,6 +329,7 @@ document.getElementById('switchSideBtn').addEventListener('click', () => {
 
 function onDragStart(source, piece, position, orientation) {
     if (game.game_over()) return false;
+    clearHighlights(); // Clear tap-to-move highlights when dragging
     
     // Sıra oyuncuda değilse (bot hamle yapıyorken vb.) taş tutulmasını engelle (pre-move iptali)
     if (game.turn() !== playerColor) return false;
@@ -261,6 +348,9 @@ function onDrop(source, target) {
 
     // Geçersiz hamleyse geri al
     if (move === null) return 'snapback';
+
+    // Clear tap-to-move highlights after a successful drag
+    clearHighlights();
 
     updateStatus();
     updateMoveHistoryUI();
@@ -361,6 +451,7 @@ botWorker.onmessage = function(e) {
     if (bestMove) {
         game.move(bestMove);
         board.position(game.fen());
+        clearHighlights(); // Clear any lingering highlights after bot moves
         updateStatus();
         updateMoveHistoryUI();
     }

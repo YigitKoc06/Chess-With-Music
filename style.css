@@ -243,6 +243,45 @@ body {
     border-radius: 4px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     overflow: hidden;
+    touch-action: none; /* Prevent mobile scroll during piece interaction */
+}
+
+/* Tap-to-move: selected piece highlight */
+.square-55d63.selected-square {
+    box-shadow: inset 0 0 12px 3px var(--accent) !important;
+}
+
+/* Tap-to-move: valid move dot (empty square) */
+.square-55d63.valid-move::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 28%;
+    height: 28%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(45, 201, 255, 0.75) 60%, transparent 61%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* Tap-to-move: valid capture highlight */
+.square-55d63.valid-capture::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, transparent 50%, rgba(255, 71, 87, 0.55) 51%);
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* Ensure squares have position relative for pseudo-elements */
+.square-55d63 {
+    position: relative !important;
 }
 
 /* Override chessboard.js default colors */
