@@ -59,70 +59,57 @@ boardEl.addEventListener('touchmove', function(e) {
     e.preventDefault();
 }, { passive: false });
 
-// --- TAP-TO-MOVE SYSTEM ---
+// =============================================
+// TAP-TO-MOVE SYSTEM (Chess.com style)
+// =============================================
 let selectedSquare = null;
 let tapStartX = 0;
 let tapStartY = 0;
-let isDragging = false;
+let wasDragged = false;
+const TAP_THRESHOLD = 8; // px - movement below this = tap
 
 function clearHighlights() {
-    $('.square-55d63').removeClass('selected-square valid-move valid-capture');
+    $('#myBoard .square-55d63').removeClass('selected-square valid-move valid-capture');
     selectedSquare = null;
 }
 
 function highlightMoves(square) {
     const moves = game.moves({ square: square, verbose: true });
-    if (moves.length === 0) return;
+    if (moves.length === 0) return false;
 
-    $('.square-' + square).addClass('selected-square');
     selectedSquare = square;
+    $('#myBoard .square-' + square).addClass('selected-square');
 
-    moves.forEach(function(move) {
-        if (move.captured) {
-            $('.square-' + move.to).addClass('valid-capture');
-        } else {
-            $('.square-' + move.to).addClass('valid-move');
-        }
+    moves.forEach(function(m) {
+        const cls = (m.captured || game.get(m.to)) ? 'valid-capture' : 'valid-move';
+        $('#myBoard .square-' + m.to).addClass(cls);
     });
+    return true;
 }
 
-function getSquareFromEvent(e) {
-    let clientX, clientY;
-    if (e.changedTouches && e.changedTouches.length > 0) {
-        clientX = e.changedTouches[0].clientX;
-        clientY = e.changedTouches[0].clientY;
-    } else {
-        clientX = e.clientX;
-        clientY = e.clientY;
-    }
-    // Find the square element at this point
-    const el = document.elementFromPoint(clientX, clientY);
-    if (!el) return null;
-    // Walk up to find the square div with data-square
-    const squareEl = el.closest('[data-square]');
-    if (!squareEl) return null;
-    return squareEl.getAttribute('data-square');
-}
-
-function handleTap(square) {
+// Try to execute a tap-to-move action for the given square
+function handleSquareTap(square) {
+    if (!square) return;
     if (game.game_over()) return;
     if (game.turn() !== playerColor) return;
-    if (!square) return;
 
     const piece = game.get(square);
-    const $sq = $('.square-' + square);
 
+    // --- CASE 1: A piece is already selected ---
     if (selectedSquare) {
-        // Tapping a valid move/capture square -> execute move
-        if ($sq.hasClass('valid-move') || $sq.hasClass('valid-capture')) {
+        const $target = $('#myBoard .square-' + square);
+
+        // 1a: Tapped on a highlighted valid-move or valid-capture square → MOVE
+        if ($target.hasClass('valid-move') || $target.hasClass('valid-capture')) {
+            const fromSq = selectedSquare;
+            clearHighlights();
             const move = game.move({
-                from: selectedSquare,
+                from: fromSq,
                 to: square,
                 promotion: 'q'
             });
-            if (move !== null) {
+            if (move) {
                 board.position(game.fen());
-                clearHighlights();
                 updateStatus();
                 updateMoveHistoryUI();
                 botStatus.innerText = "Düşünüyor...";
@@ -130,59 +117,67 @@ function handleTap(square) {
                 return;
             }
         }
-        // Tapping another own piece -> switch selection
-        if (piece && piece.color === playerColor) {
+
+        // 1b: Tapped on another own piece → switch selection
+        if (piece && piece.color === playerColor && square !== selectedSquare) {
             clearHighlights();
             highlightMoves(square);
             return;
         }
-        // Tapping elsewhere -> deselect
+
+        // 1c: Tapped same square again or empty/invalid square → deselect
         clearHighlights();
         return;
     }
 
-    // Nothing selected yet: select own piece
+    // --- CASE 2: No piece selected yet ---
     if (piece && piece.color === playerColor) {
-        clearHighlights();
         highlightMoves(square);
     }
 }
 
-// Track touch/mouse start position to distinguish tap vs drag
-boardEl.addEventListener('mousedown', function(e) {
+// Resolve a screen coordinate to a board square name (e.g. "e4")
+function getSquareAt(clientX, clientY) {
+    const el = document.elementFromPoint(clientX, clientY);
+    if (!el) return null;
+    const sq = el.closest('[data-square]');
+    return sq ? sq.getAttribute('data-square') : null;
+}
+
+// --- Pointer event listeners for tap detection ---
+// We use pointerdown/pointerup which unify mouse + touch.
+// A tiny setTimeout on pointerup lets chessboard.js finish its
+// own drop processing before we inspect the board state.
+
+boardEl.addEventListener('pointerdown', function(e) {
     tapStartX = e.clientX;
     tapStartY = e.clientY;
-    isDragging = false;
-});
+    wasDragged = false;
+}, { passive: true });
 
-boardEl.addEventListener('touchstart', function(e) {
-    if (e.touches.length > 0) {
-        tapStartX = e.touches[0].clientX;
-        tapStartY = e.touches[0].clientY;
-        isDragging = false;
+boardEl.addEventListener('pointermove', function(e) {
+    if (!wasDragged) {
+        const dx = Math.abs(e.clientX - tapStartX);
+        const dy = Math.abs(e.clientY - tapStartY);
+        if (dx > TAP_THRESHOLD || dy > TAP_THRESHOLD) {
+            wasDragged = true;
+        }
     }
 }, { passive: true });
 
-boardEl.addEventListener('mouseup', function(e) {
-    const dx = e.clientX - tapStartX;
-    const dy = e.clientY - tapStartY;
-    // Only treat as tap if movement is tiny (< 10px)
-    if (Math.abs(dx) < 10 && Math.abs(dy) < 10) {
-        const square = getSquareFromEvent(e);
-        handleTap(square);
-    }
-});
+boardEl.addEventListener('pointerup', function(e) {
+    // Only process taps, not drags
+    if (wasDragged) return;
 
-boardEl.addEventListener('touchend', function(e) {
-    if (e.changedTouches.length > 0) {
-        const dx = e.changedTouches[0].clientX - tapStartX;
-        const dy = e.changedTouches[0].clientY - tapStartY;
-        if (Math.abs(dx) < 10 && Math.abs(dy) < 10) {
-            const square = getSquareFromEvent(e);
-            handleTap(square);
-        }
-    }
-});
+    const cx = e.clientX;
+    const cy = e.clientY;
+
+    // Small delay so chessboard.js finishes snap-back first
+    setTimeout(function() {
+        const square = getSquareAt(cx, cy);
+        handleSquareTap(square);
+    }, 50);
+}, { passive: true });
 
 // --- Event Listeners ---
 
@@ -376,8 +371,7 @@ document.getElementById('switchSideBtn').addEventListener('click', () => {
 
 function onDragStart(source, piece, position, orientation) {
     if (game.game_over()) return false;
-    clearHighlights(); // Clear tap-to-move highlights when dragging
-    
+
     // Sıra oyuncuda değilse (bot hamle yapıyorken vb.) taş tutulmasını engelle (pre-move iptali)
     if (game.turn() !== playerColor) return false;
 
@@ -386,6 +380,12 @@ function onDragStart(source, piece, position, orientation) {
 }
 
 function onDrop(source, target) {
+    // Same square = tap/click, not a drag → let pointerup handler deal with it
+    if (source === target) return 'snapback';
+
+    // Real drag: clear any tap-to-move highlights
+    clearHighlights();
+
     // Hamleyi dene
     let move = game.move({
         from: source,
@@ -395,9 +395,6 @@ function onDrop(source, target) {
 
     // Geçersiz hamleyse geri al
     if (move === null) return 'snapback';
-
-    // Clear tap-to-move highlights after a successful drag
-    clearHighlights();
 
     updateStatus();
     updateMoveHistoryUI();
