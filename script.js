@@ -378,3 +378,105 @@ function makeBotMove() {
         history: game.history()
     });
 }
+
+// --- MOBILE RESPONSIVE LOGIC ---
+
+const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+const mobileMusicBtn = document.getElementById('mobileMusicBtn');
+const mobileOverlay = document.getElementById('mobileOverlay');
+const sidebar = document.querySelector('.sidebar');
+const rightPanel = document.querySelector('.right-panel');
+
+function isMobileView() {
+    return window.innerWidth <= 1100;
+}
+
+function closeAllDrawers() {
+    sidebar.classList.remove('open');
+    rightPanel.classList.remove('open');
+    mobileOverlay.classList.remove('visible');
+    mobileMenuBtn.classList.remove('active');
+    mobileMusicBtn.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+mobileMenuBtn.addEventListener('click', () => {
+    const isOpen = sidebar.classList.contains('open');
+    closeAllDrawers();
+    if (!isOpen) {
+        sidebar.classList.add('open');
+        mobileOverlay.classList.add('visible');
+        mobileMenuBtn.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+});
+
+mobileMusicBtn.addEventListener('click', () => {
+    const isOpen = rightPanel.classList.contains('open');
+    closeAllDrawers();
+    if (!isOpen) {
+        rightPanel.classList.add('open');
+        mobileOverlay.classList.add('visible');
+        mobileMusicBtn.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+});
+
+mobileOverlay.addEventListener('click', closeAllDrawers);
+
+// Close drawers on Escape key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeAllDrawers();
+});
+
+// Resize board on window resize / orientation change
+function resizeBoard() {
+    if (board && typeof board.resize === 'function') {
+        board.resize();
+    }
+}
+
+window.addEventListener('resize', () => {
+    resizeBoard();
+    // Auto-close drawers if switching to desktop
+    if (!isMobileView()) {
+        closeAllDrawers();
+    }
+});
+
+window.addEventListener('orientationchange', () => {
+    setTimeout(resizeBoard, 300);
+});
+
+// Swipe gesture support to close drawers
+let touchStartX = 0;
+let touchStartY = 0;
+
+document.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+    touchStartY = e.changedTouches[0].screenY;
+}, { passive: true });
+
+document.addEventListener('touchend', (e) => {
+    const touchEndX = e.changedTouches[0].screenX;
+    const touchEndY = e.changedTouches[0].screenY;
+    const deltaX = touchEndX - touchStartX;
+    const deltaY = touchEndY - touchStartY;
+
+    // Only consider horizontal swipes (deltaX significantly larger than deltaY)
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 80) {
+        // Swipe left on sidebar -> close it
+        if (deltaX < 0 && sidebar.classList.contains('open')) {
+            closeAllDrawers();
+        }
+        // Swipe right on right panel -> close it
+        if (deltaX > 0 && rightPanel.classList.contains('open')) {
+            closeAllDrawers();
+        }
+    }
+    
+    // Swipe down on bottom-sheet right panel (phones)
+    if (window.innerWidth <= 600 && deltaY > 80 && rightPanel.classList.contains('open')) {
+        closeAllDrawers();
+    }
+}, { passive: true });

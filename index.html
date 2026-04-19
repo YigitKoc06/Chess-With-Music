@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Chess With Music</title>
     <link rel="icon" type="image/png" href="png-transparent-chess-figure-white-pawn-thumbnail.png">
     <!-- Google Fonts -->
@@ -35,6 +35,17 @@
             </button>
         </div>
     </div>
+
+    <!-- Mobile Toggle Buttons -->
+    <button id="mobileMenuBtn" class="mobile-toggle-btn mobile-menu-btn" aria-label="Menü">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+    <button id="mobileMusicBtn" class="mobile-toggle-btn mobile-music-btn" aria-label="Müzik ve Hamle Geçmişi">
+        <i class="fa-solid fa-music"></i>
+    </button>
+
+    <!-- Mobile Overlay (closes drawers) -->
+    <div id="mobileOverlay" class="mobile-overlay"></div>
 
     <!-- Main Container -->
     <div class="container">

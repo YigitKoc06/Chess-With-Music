@@ -433,3 +433,320 @@ body {
 .move-history::-webkit-scrollbar-thumb:hover {
     background: var(--text-primary);
 }
+
+/* ============================================
+   MOBILE RESPONSIVE STYLES
+   ============================================ */
+
+/* Mobile Toggle Buttons */
+.mobile-toggle-btn {
+    display: none;
+    position: fixed;
+    z-index: 900;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(15, 15, 20, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    transition: var(--transition);
+}
+
+.mobile-toggle-btn:hover,
+.mobile-toggle-btn:active {
+    background: rgba(30, 30, 40, 0.9);
+    color: var(--accent);
+    border-color: var(--accent);
+    transform: scale(1.05);
+}
+
+.mobile-toggle-btn.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+}
+
+.mobile-menu-btn {
+    top: 1rem;
+    left: 1rem;
+}
+
+.mobile-music-btn {
+    top: 1rem;
+    right: 1rem;
+}
+
+/* Mobile Overlay */
+.mobile-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 800;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.mobile-overlay.visible {
+    display: block;
+    opacity: 1;
+}
+
+/* ============================================
+   TABLET BREAKPOINT (max-width: 1100px)
+   ============================================ */
+@media (max-width: 1100px) {
+    body {
+        overflow: auto;
+        align-items: flex-start;
+    }
+
+    .container {
+        flex-direction: column;
+        align-items: center;
+        height: auto;
+        max-height: none;
+        padding: 1rem;
+        gap: 1rem;
+    }
+
+    .mobile-toggle-btn {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Sidebar becomes a slide-in drawer from the left */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 280px;
+        height: 100vh;
+        height: 100dvh;
+        border-radius: 0 var(--border-radius) var(--border-radius) 0;
+        z-index: 850;
+        transform: translateX(-100%);
+        transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow-y: auto;
+        padding: 4.5rem 1.5rem 1.5rem;
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    /* Right panel becomes a slide-in drawer from the right */
+    .right-panel {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 320px;
+        height: 100vh;
+        height: 100dvh;
+        border-radius: var(--border-radius) 0 0 var(--border-radius);
+        z-index: 850;
+        transform: translateX(100%);
+        transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow-y: auto;
+        padding-top: 1rem;
+    }
+
+    .right-panel.open {
+        transform: translateX(0);
+    }
+
+    /* Board takes full width */
+    .board-area {
+        width: 100%;
+        padding-top: 4rem;
+    }
+
+    .chessboard {
+        max-width: 520px;
+        margin: 0 auto;
+    }
+}
+
+/* ============================================
+   PHONE BREAKPOINT (max-width: 600px)
+   ============================================ */
+@media (max-width: 600px) {
+    body {
+        background-attachment: scroll;
+    }
+
+    .container {
+        padding: 0.5rem;
+        gap: 0.5rem;
+    }
+
+    /* Overlay adjustments */
+    .overlay-content {
+        padding: 2rem 1.5rem;
+        margin: 1rem;
+        border-radius: 12px;
+    }
+
+    .overlay-content h1 {
+        font-size: 1.8rem;
+    }
+
+    .overlay-content p {
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .difficulty-select {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .primary-btn {
+        padding: 0.8rem 1.5rem;
+        font-size: 1rem;
+    }
+
+    /* Toggle buttons slightly smaller on phones */
+    .mobile-toggle-btn {
+        width: 44px;
+        height: 44px;
+        font-size: 1.1rem;
+    }
+
+    .mobile-menu-btn {
+        top: 0.75rem;
+        left: 0.75rem;
+    }
+
+    .mobile-music-btn {
+        top: 0.75rem;
+        right: 0.75rem;
+    }
+
+    /* Sidebar narrower on phones */
+    .sidebar {
+        width: 260px;
+        padding: 4rem 1rem 1rem;
+    }
+
+    .sidebar-controls {
+        margin: 1.5rem 0;
+        gap: 1rem;
+    }
+
+    /* Right panel full width on phones */
+    .right-panel {
+        width: 100%;
+        border-radius: var(--border-radius) var(--border-radius) 0 0;
+        height: 85vh;
+        height: 85dvh;
+        top: auto;
+        bottom: 0;
+        transform: translateY(100%);
+    }
+
+    .right-panel.open {
+        transform: translateY(0);
+    }
+
+    /* Board area */
+    .board-area {
+        padding-top: 3.5rem;
+    }
+
+    .chessboard {
+        max-width: 100%;
+    }
+
+    /* Music player compact */
+    .music-player {
+        padding: 1rem;
+        gap: 0.75rem;
+    }
+
+    .playback-controls {
+        gap: 0.8rem;
+    }
+
+    .music-btn {
+        font-size: 1rem;
+    }
+
+    .play-pause {
+        font-size: 1.3rem;
+    }
+
+    .volume-slider {
+        width: 60px;
+    }
+
+    /* Toast positioning */
+    .toast {
+        bottom: 1rem;
+        padding: 0.75rem 1.5rem;
+        font-size: 0.9rem;
+        max-width: 90%;
+    }
+}
+
+/* ============================================
+   VERY SMALL PHONES (max-width: 380px)
+   ============================================ */
+@media (max-width: 380px) {
+    .overlay-content h1 {
+        font-size: 1.5rem;
+    }
+
+    .overlay-content {
+        padding: 1.5rem 1rem;
+    }
+
+    .sidebar {
+        width: 240px;
+    }
+
+    .music-info {
+        font-size: 0.85rem;
+    }
+
+    .progress-container {
+        font-size: 0.7rem !important;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .sidebar-btn {
+        padding: 0.8rem;
+        font-size: 1.2rem;
+    }
+
+    .sidebar-select {
+        padding: 0.6rem;
+        font-size: 1rem;
+    }
+
+    .music-btn {
+        padding: 0.5rem;
+        min-width: 44px;
+        min-height: 44px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .move-row {
+        padding: 0.6rem;
+    }
+}
