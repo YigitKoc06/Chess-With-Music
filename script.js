@@ -61,6 +61,9 @@ boardEl.addEventListener('touchmove', function(e) {
 
 // --- TAP-TO-MOVE SYSTEM ---
 let selectedSquare = null;
+let tapStartX = 0;
+let tapStartY = 0;
+let isDragging = false;
 
 function clearHighlights() {
     $('.square-55d63').removeClass('selected-square valid-move valid-capture');
@@ -68,15 +71,12 @@ function clearHighlights() {
 }
 
 function highlightMoves(square) {
-    // Get all valid moves from this square
     const moves = game.moves({ square: square, verbose: true });
     if (moves.length === 0) return;
 
-    // Highlight the selected piece's square
     $('.square-' + square).addClass('selected-square');
     selectedSquare = square;
 
-    // Highlight each valid target square
     moves.forEach(function(move) {
         if (move.captured) {
             $('.square-' + move.to).addClass('valid-capture');
@@ -86,27 +86,40 @@ function highlightMoves(square) {
     });
 }
 
-// Click handler for tap-to-move
-$(document).on('click', '#myBoard .square-55d63', function() {
-    // Don't process taps when game is over or it's not player's turn
+function getSquareFromEvent(e) {
+    let clientX, clientY;
+    if (e.changedTouches && e.changedTouches.length > 0) {
+        clientX = e.changedTouches[0].clientX;
+        clientY = e.changedTouches[0].clientY;
+    } else {
+        clientX = e.clientX;
+        clientY = e.clientY;
+    }
+    // Find the square element at this point
+    const el = document.elementFromPoint(clientX, clientY);
+    if (!el) return null;
+    // Walk up to find the square div with data-square
+    const squareEl = el.closest('[data-square]');
+    if (!squareEl) return null;
+    return squareEl.getAttribute('data-square');
+}
+
+function handleTap(square) {
     if (game.game_over()) return;
     if (game.turn() !== playerColor) return;
-
-    const square = $(this).attr('data-square');
     if (!square) return;
 
     const piece = game.get(square);
+    const $sq = $('.square-' + square);
 
-    // If a square is already selected
     if (selectedSquare) {
-        // If clicking a valid move/capture square -> make the move
-        if ($(this).hasClass('valid-move') || $(this).hasClass('valid-capture')) {
+        // Tapping a valid move/capture square -> execute move
+        if ($sq.hasClass('valid-move') || $sq.hasClass('valid-capture')) {
             const move = game.move({
                 from: selectedSquare,
                 to: square,
                 promotion: 'q'
             });
-
             if (move !== null) {
                 board.position(game.fen());
                 clearHighlights();
@@ -117,23 +130,57 @@ $(document).on('click', '#myBoard .square-55d63', function() {
                 return;
             }
         }
-
-        // If clicking on another own piece -> switch selection
+        // Tapping another own piece -> switch selection
         if (piece && piece.color === playerColor) {
             clearHighlights();
             highlightMoves(square);
             return;
         }
-
-        // Otherwise clear selection
+        // Tapping elsewhere -> deselect
         clearHighlights();
         return;
     }
 
-    // No square selected yet: if clicking on own piece, select it
+    // Nothing selected yet: select own piece
     if (piece && piece.color === playerColor) {
         clearHighlights();
         highlightMoves(square);
+    }
+}
+
+// Track touch/mouse start position to distinguish tap vs drag
+boardEl.addEventListener('mousedown', function(e) {
+    tapStartX = e.clientX;
+    tapStartY = e.clientY;
+    isDragging = false;
+});
+
+boardEl.addEventListener('touchstart', function(e) {
+    if (e.touches.length > 0) {
+        tapStartX = e.touches[0].clientX;
+        tapStartY = e.touches[0].clientY;
+        isDragging = false;
+    }
+}, { passive: true });
+
+boardEl.addEventListener('mouseup', function(e) {
+    const dx = e.clientX - tapStartX;
+    const dy = e.clientY - tapStartY;
+    // Only treat as tap if movement is tiny (< 10px)
+    if (Math.abs(dx) < 10 && Math.abs(dy) < 10) {
+        const square = getSquareFromEvent(e);
+        handleTap(square);
+    }
+});
+
+boardEl.addEventListener('touchend', function(e) {
+    if (e.changedTouches.length > 0) {
+        const dx = e.changedTouches[0].clientX - tapStartX;
+        const dy = e.changedTouches[0].clientY - tapStartY;
+        if (Math.abs(dx) < 10 && Math.abs(dy) < 10) {
+            const square = getSquareFromEvent(e);
+            handleTap(square);
+        }
     }
 });
 
