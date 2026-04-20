@@ -122,21 +122,43 @@ function orderMoves(g) {
     return captures.concat(checks, others);
 }
 
+// Transposition table — caches evaluated positions to avoid redundant work
+let transpositionTable = {};
+
 function minimax(g, depth, alpha, beta, isMaximizingPlayer) {
-    if (g.in_checkmate()) {
-        return isMaximizingPlayer ? -99999 + (10 - depth) : 99999 - (10 - depth);
-    }
-    if (g.in_draw() || g.in_stalemate() || g.in_threefold_repetition()) {
+    // Check for terminal positions using lightweight move generation
+    // g.moves() returns empty array for both checkmate and stalemate
+    const possibleMoves = orderMoves(g);
+    
+    if (possibleMoves.length === 0) {
+        // Checkmate or stalemate — check which one
+        if (g.in_check()) {
+            // Checkmate: penalize more at shallower depth (prefer faster mates)
+            return isMaximizingPlayer ? -99999 + (10 - depth) : 99999 - (10 - depth);
+        }
+        // Stalemate
         return 0;
     }
+
+    // Cheap draw check (insufficient material only — avoids expensive threefold repetition)
+    if (g.insufficient_material()) {
+        return 0;
+    }
+
     if (depth === 0) {
         return evaluateBoard(g);
     }
 
-    const possibleMoves = orderMoves(g);
+    // Transposition table lookup
+    const fen = g.fen();
+    const ttKey = fen + '|' + depth + '|' + (isMaximizingPlayer ? '1' : '0');
+    if (transpositionTable[ttKey] !== undefined) {
+        return transpositionTable[ttKey];
+    }
 
+    let bestVal;
     if (isMaximizingPlayer) {
-        let bestVal = -Infinity;
+        bestVal = -Infinity;
         for (let i = 0; i < possibleMoves.length; i++) {
             g.move(possibleMoves[i]);
             bestVal = Math.max(bestVal, minimax(g, depth - 1, alpha, beta, false));
@@ -144,9 +166,8 @@ function minimax(g, depth, alpha, beta, isMaximizingPlayer) {
             alpha = Math.max(alpha, bestVal);
             if (beta <= alpha) break;
         }
-        return bestVal;
     } else {
-        let bestVal = Infinity;
+        bestVal = Infinity;
         for (let i = 0; i < possibleMoves.length; i++) {
             g.move(possibleMoves[i]);
             bestVal = Math.min(bestVal, minimax(g, depth - 1, alpha, beta, true));
@@ -154,11 +175,17 @@ function minimax(g, depth, alpha, beta, isMaximizingPlayer) {
             beta = Math.min(beta, bestVal);
             if (beta <= alpha) break;
         }
-        return bestVal;
     }
+
+    // Store in transposition table
+    transpositionTable[ttKey] = bestVal;
+    return bestVal;
 }
 
 function getBestMove(g, depth, isBotWhite, history) {
+    // Clear transposition table for each new move calculation
+    transpositionTable = {};
+
     // Açılış kütüphanesi kontrolü — ilk birkaç hamle için anında yanıt
     const key = history.join(',');
     const bookMoves = openingBook[key];
@@ -171,6 +198,13 @@ function getBestMove(g, depth, isBotWhite, history) {
             return pick;
         }
         g.undo(); // safety
+    }
+
+    // Check for draw conditions at root level only (these are expensive)
+    if (g.in_draw() || g.in_threefold_repetition()) {
+        // Still need to return a move even in draw
+        const moves = g.moves();
+        return moves[Math.floor(Math.random() * moves.length)] || null;
     }
 
     let possibleMoves = g.moves({ verbose: true });

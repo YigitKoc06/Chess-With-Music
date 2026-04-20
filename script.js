@@ -71,7 +71,10 @@ boardEl.addEventListener('touchmove', function(e) {
 let selectedSquare = null;
 
 function clearHighlights() {
-    $('#myBoard .square-55d63').removeClass('selected-square valid-move valid-capture');
+    // Only remove classes from elements that actually have them (much faster than scanning all 64 squares)
+    $('#myBoard .selected-square').removeClass('selected-square');
+    $('#myBoard .valid-move').removeClass('valid-move');
+    $('#myBoard .valid-capture').removeClass('valid-capture');
     selectedSquare = null;
 }
 
@@ -374,8 +377,10 @@ document.getElementById('resetBtn').addEventListener('click', () => {
     game.reset();
     board.start();
     clearHighlights();
+    _prevCheckSquare = null;
     updateStatus();
     moveHistoryEl.innerHTML = '';
+    _renderedMoveCount = 0;
     moveCount = 1;
     showToast("Oyun sıfırlandı.");
     if (playerColor === 'b') {
@@ -400,8 +405,10 @@ document.getElementById('switchSideBtn').addEventListener('click', () => {
     game.reset();
     board.start();
     clearHighlights();
+    _prevCheckSquare = null;
     updateStatus();
     moveHistoryEl.innerHTML = '';
+    _renderedMoveCount = 0;
     moveCount = 1;
     showToast(`Taraf değiştirildi. Sizin renginiz: ${playerColor === 'w' ? 'Beyaz' : 'Siyah'}`);
     
@@ -541,8 +548,10 @@ document.getElementById('gameOverReplay').addEventListener('click', () => {
     game.reset();
     board.start();
     clearHighlights();
+    _prevCheckSquare = null;
     updateStatus();
     moveHistoryEl.innerHTML = '';
+    _renderedMoveCount = 0;
     moveCount = 1;
     showToast('Oyun yeniden başladı!');
     if (playerColor === 'b') {
@@ -595,8 +604,10 @@ document.getElementById('gameOverSwitch').addEventListener('click', () => {
     game.reset();
     board.start();
     clearHighlights();
+    _prevCheckSquare = null;
     updateStatus();
     moveHistoryEl.innerHTML = '';
+    _renderedMoveCount = 0;
     moveCount = 1;
     showToast(`Taraf değiştirildi. Sizin renginiz: ${playerColor === 'w' ? 'Beyaz' : 'Siyah'}`);
     
@@ -614,32 +625,76 @@ function showToast(msg) {
     }, 3000);
 }
 
+// Track rendered move count to enable incremental updates
+let _renderedMoveCount = 0;
+
 function updateMoveHistoryUI() {
     const history = game.history();
-    moveHistoryEl.innerHTML = '';
-    for (let i = 0; i < history.length; i += 2) {
-        const whiteMove = history[i];
-        const blackMove = history[i + 1] ? history[i + 1] : '';
-        const rowNum = Math.floor(i / 2) + 1;
-        
-        moveHistoryEl.innerHTML += `
-            <div class="move-row">
-                <div class="move-number">${rowNum}.</div>
-                <div class="move-white">${whiteMove}</div>
-                <div class="move-black">${blackMove}</div>
-            </div>
-        `;
+    const totalMoves = history.length;
+
+    // Full reset detection (game was reset)
+    if (totalMoves < _renderedMoveCount) {
+        moveHistoryEl.innerHTML = '';
+        _renderedMoveCount = 0;
     }
+
+    // Nothing new to render
+    if (totalMoves === _renderedMoveCount) {
+        moveHistoryEl.scrollTop = moveHistoryEl.scrollHeight;
+        return;
+    }
+
+    // Black just moved → update the last row's black cell
+    if (totalMoves === _renderedMoveCount + 1 && totalMoves % 2 === 0) {
+        const lastRow = moveHistoryEl.lastElementChild;
+        if (lastRow) {
+            lastRow.querySelector('.move-black').textContent = history[totalMoves - 1];
+            _renderedMoveCount = totalMoves;
+            moveHistoryEl.scrollTop = moveHistoryEl.scrollHeight;
+            return;
+        }
+    }
+
+    // White just moved → append a new row
+    // (Also handles edge cases where multiple moves need rendering)
+    const startIdx = _renderedMoveCount % 2 === 0 ? _renderedMoveCount : _renderedMoveCount - 1;
+    // If the last row was incomplete, remove it and re-render from that pair
+    if (_renderedMoveCount % 2 !== 0 && moveHistoryEl.lastElementChild) {
+        moveHistoryEl.removeChild(moveHistoryEl.lastElementChild);
+    }
+
+    const fragment = document.createDocumentFragment();
+    const actualStart = _renderedMoveCount % 2 !== 0 ? _renderedMoveCount - 1 : _renderedMoveCount;
+    for (let i = actualStart; i < totalMoves; i += 2) {
+        const rowNum = Math.floor(i / 2) + 1;
+        const row = document.createElement('div');
+        row.className = 'move-row';
+        row.innerHTML =
+            '<div class="move-number">' + rowNum + '.</div>' +
+            '<div class="move-white">' + history[i] + '</div>' +
+            '<div class="move-black">' + (history[i + 1] || '') + '</div>';
+        fragment.appendChild(row);
+    }
+    moveHistoryEl.appendChild(fragment);
+    _renderedMoveCount = totalMoves;
     moveHistoryEl.scrollTop = moveHistoryEl.scrollHeight;
 }
 
+// Cache previous check square to avoid unnecessary DOM work
+let _prevCheckSquare = null;
+
 function highlightCheck() {
-    $('.square-55d63').removeClass('in-check');
+    // Remove previous check highlight only if one existed
+    if (_prevCheckSquare) {
+        $('.square-' + _prevCheckSquare).removeClass('in-check');
+        _prevCheckSquare = null;
+    }
     if (game.in_check() || game.in_checkmate()) {
         const color = game.turn();
         const kingSq = findKingSquare(color);
         if (kingSq) {
             $('.square-' + kingSq).addClass('in-check');
+            _prevCheckSquare = kingSq;
         }
     }
 }
