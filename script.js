@@ -344,14 +344,20 @@ function formatTime(seconds) {
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
 }
 
+let _lastTimeUpdateSec = -1;
 lofiPlayer.addEventListener('timeupdate', () => {
     const current = lofiPlayer.currentTime;
     const duration = lofiPlayer.duration;
     
     if (duration) {
+        // Only update DOM when the displayed second changes
+        const currentSec = Math.floor(current);
+        if (currentSec === _lastTimeUpdateSec) return;
+        _lastTimeUpdateSec = currentSec;
+
         progressBar.value = (current / duration) * 100;
-        currentTimeSpan.innerText = formatTime(current);
-        durationTimeSpan.innerText = formatTime(duration);
+        currentTimeSpan.textContent = formatTime(current);
+        durationTimeSpan.textContent = formatTime(duration);
     }
 });
 

@@ -1,7 +1,7 @@
 :root {
     --bg-main: #0a0a0a;
-    --bg-panel: rgba(15, 15, 20, 0.65);
-    --bg-panel-hover: rgba(30, 30, 35, 0.75);
+    --bg-panel: #0f0f14;
+    --bg-panel-hover: #1e1e23;
     --board-dark: #3a3a42;
     --board-light: #dcdce1;
     --text-primary: #ffffff;
@@ -10,7 +10,7 @@
     --accent-hover: #5cd6ff;
     --danger: #ff4757;
     --danger-hover: #ff6b81;
-    --shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    --shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
     --border-radius: 16px;
     --transition: 0.3s ease;
 }
@@ -27,7 +27,6 @@ body {
     background-image: url('0135928b5946e7bccf8b15cd11cbb21e.jpg');
     background-size: cover;
     background-position: center;
-    background-attachment: fixed;
     color: var(--text-primary);
     display: flex;
     justify-content: center;
@@ -43,13 +42,13 @@ body {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(10px);
+    background: rgba(0, 0, 0, 0.92);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
     transition: opacity 0.5s ease;
+    will-change: opacity;
 }
 
 .overlay-content {
@@ -59,8 +58,6 @@ body {
     text-align: center;
     max-width: 500px;
     box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -142,8 +139,6 @@ body {
     border-radius: var(--border-radius);
     padding: 1.5rem;
     box-shadow: var(--shadow);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -241,9 +236,10 @@ body {
     width: 100%;
     max-width: 600px;
     border-radius: 4px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
     overflow: hidden;
     touch-action: none; /* Prevent mobile scroll during piece interaction */
+    contain: layout style;
 }
 
 /* Tap-to-move: selected piece highlight */
@@ -303,8 +299,6 @@ body {
     flex-direction: column;
     box-shadow: var(--shadow);
     overflow: hidden;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -321,6 +315,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 0.2rem;
+    contain: content;
 }
 
 .move-row {
@@ -467,9 +462,7 @@ body {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background: rgba(0, 0, 0, 0.85);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -477,6 +470,7 @@ body {
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.4s ease;
+    will-change: opacity;
 }
 
 .game-over-overlay.visible {
@@ -485,7 +479,7 @@ body {
 }
 
 .game-over-modal {
-    background: linear-gradient(135deg, rgba(18, 18, 25, 0.95), rgba(28, 28, 40, 0.92));
+    background: linear-gradient(135deg, #121219, #1c1c28);
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 20px;
     padding: 2.5rem 3rem;
@@ -493,11 +487,11 @@ body {
     max-width: 400px;
     width: 90%;
     box-shadow:
-        0 24px 80px rgba(0, 0, 0, 0.6),
-        0 0 60px rgba(45, 201, 255, 0.08),
+        0 24px 48px rgba(0, 0, 0, 0.5),
         inset 0 1px 0 rgba(255, 255, 255, 0.06);
     transform: scale(0.8) translateY(30px);
     transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    will-change: transform;
 }
 
 .game-over-overlay.visible .game-over-modal {
@@ -693,9 +687,7 @@ body {
     height: 48px;
     border-radius: 50%;
     border: 1px solid rgba(255, 255, 255, 0.15);
-    background: rgba(15, 15, 20, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: #0f0f14;
     color: var(--text-primary);
     font-size: 1.2rem;
     cursor: pointer;
@@ -735,9 +727,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.6);
     z-index: 800;
     opacity: 0;
     transition: opacity 0.3s ease;
