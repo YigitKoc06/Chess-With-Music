@@ -18,20 +18,23 @@
 
     <!-- Start Overlay (Required to start audio due to browser policies) -->
     <div id="startOverlay" class="start-overlay">
-        <div class="overlay-content">
+        <div class="overlay-content" style="position: relative;">
+            <button id="overlayLangBtn" class="overlay-lang-btn" title="Switch Language">
+                <i class="fa-solid fa-language"></i> <span id="overlayLangLabel">EN</span>
+            </button>
             <h1>Chess With Music</h1>
-            <p>Sade, zorlayıcı ve lo-fi atmosferli satranç deneyimi.</p>
+            <p data-i18n="overlayDesc">Sade, zorlayıcı ve lo-fi atmosferli satranç deneyimi.</p>
             <div class="difficulty-select">
-                <label>Zorluk:</label>
+                <label data-i18n="difficultyLabel">Zorluk:</label>
                 <select id="difficulty">
-                    <option value="1">Kolay (Derinlik 1)</option>
-                    <option value="2">Orta (Derinlik 2)</option>
-                    <option value="3" selected>Zor (Derinlik 3)</option>
-                    <option value="4">Çok Zor (Derinlik 4 - Yavaş)</option>
+                    <option value="1" data-i18n="easy1">Kolay (Derinlik 1)</option>
+                    <option value="2" data-i18n="medium2">Orta (Derinlik 2)</option>
+                    <option value="3" selected data-i18n="hard3">Zor (Derinlik 3)</option>
+                    <option value="4" data-i18n="veryHard4">Çok Zor (Derinlik 4 - Yavaş)</option>
                 </select>
             </div>
             <button id="startGameBtn" class="primary-btn">
-                <i class="fa-solid fa-play"></i> Oyuna Başla
+                <i class="fa-solid fa-play"></i> <span data-i18n="startGame">Oyuna Başla</span>
             </button>
         </div>
     </div>
@@ -57,28 +60,32 @@
                     <i class="fa-solid fa-robot"></i>
                 </div>
                 <div class="details">
-                    <div class="name">Bot (Siyah)</div>
-                    <div class="status" id="botStatus">Bekleniyor...</div>
+                    <div class="name" id="botName" data-i18n="botBlack">Bot (Siyah)</div>
+                    <div class="status" id="botStatus" data-i18n="waiting">Bekleniyor...</div>
                 </div>
             </div>
 
             <div class="sidebar-controls">
                 <div class="control-box">
-                    <span>Bot Zorluğu</span>
+                    <span data-i18n="botDifficulty">Bot Zorluğu</span>
                     <select id="inGameDifficulty" class="sidebar-select">
-                        <option value="1">Kolay</option>
-                        <option value="2">Orta</option>
-                        <option value="3" selected>Zor</option>
-                        <option value="4">Çok Zor</option>
+                        <option value="1" data-i18n="easy">Kolay</option>
+                        <option value="2" data-i18n="medium">Orta</option>
+                        <option value="3" selected data-i18n="hard">Zor</option>
+                        <option value="4" data-i18n="veryHard">Çok Zor</option>
                     </select>
                 </div>
                 <div class="control-box">
-                    <span>Yeniden Başlat</span>
+                    <span data-i18n="restart">Yeniden Başlat</span>
                     <button id="resetBtn" class="sidebar-btn"><i class="fa-solid fa-rotate-right"></i></button>
                 </div>
                 <div class="control-box">
-                    <span>Taraf Değiştir</span>
+                    <span data-i18n="switchSide">Taraf Değiştir</span>
                     <button id="switchSideBtn" class="sidebar-btn"><i class="fa-solid fa-retweet"></i></button>
+                </div>
+                <div class="control-box">
+                    <span data-i18n="language">Dil</span>
+                    <button id="langToggleBtn" class="sidebar-btn"><i class="fa-solid fa-language"></i> <span id="langLabel">EN</span></button>
                 </div>
             </div>
 
@@ -87,8 +94,8 @@
                     <i class="fa-solid fa-user"></i>
                 </div>
                 <div class="details">
-                    <div class="name">Sen (Beyaz)</div>
-                    <div class="status">Sıra sende mi? Bekleniyor...</div>
+                    <div class="name" id="userName" data-i18n="youWhite">Sen (Beyaz)</div>
+                    <div class="status" data-i18n="yourTurnWaiting">Sıra sende mi? Bekleniyor...</div>
                 </div>
             </div>
         </div>
@@ -101,7 +108,7 @@
         <!-- Right Panel / Move History -->
         <div class="right-panel">
             <div class="panel-header">
-                <h3>Hamle Geçmişi</h3>
+                <h3 data-i18n="moveHistory">Hamle Geçmişi</h3>
             </div>
             <div class="move-history" id="moveHistory">
                 <!-- Move pairs will be dynamically injected here -->
@@ -127,7 +134,7 @@
                     </div>
                     <div class="volume-controls">
                         <button class="music-btn" id="toggleMute" title="Sessize Al / Sesi Aç"><i class="fa-solid fa-volume-high"></i></button>
-                        <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.01" value="0.3" title="Ses Seviyesi">
+                        <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.01" value="0.3" data-i18n-title="volumeLevel" title="Ses Seviyesi">
                     </div>
                 </div>
                 <!-- Background audio player (hidden) -->
@@ -149,15 +156,15 @@
             <div class="game-over-actions">
                 <button id="gameOverReplay" class="game-over-btn replay-btn">
                     <i class="fa-solid fa-rotate-right"></i>
-                    <span>Yeniden Oyna</span>
+                    <span data-i18n="playAgain">Yeniden Oyna</span>
                 </button>
                 <button id="gameOverDifficulty" class="game-over-btn difficulty-btn">
                     <i class="fa-solid fa-sliders"></i>
-                    <span>Zorluğu Ayarla</span>
+                    <span data-i18n="adjustDifficulty">Zorluğu Ayarla</span>
                 </button>
                 <button id="gameOverSwitch" class="game-over-btn switch-btn">
                     <i class="fa-solid fa-retweet"></i>
-                    <span>Taraf Değiştir</span>
+                    <span data-i18n="switchSide">Taraf Değiştir</span>
                 </button>
             </div>
         </div>

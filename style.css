@@ -61,6 +61,32 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+/* Language toggle button on overlay */
+.overlay-lang-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: var(--text-secondary);
+    padding: 0.4rem 0.75rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: var(--transition);
+}
+
+.overlay-lang-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
 .overlay-content h1 {
     font-size: 2.5rem;
     margin-bottom: 1rem;

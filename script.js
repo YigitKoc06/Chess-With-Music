@@ -1,3 +1,157 @@
+// =============================================
+// i18n — Language System
+// =============================================
+const translations = {
+    tr: {
+        // Overlay
+        overlayDesc: 'Sade, zorlayıcı ve lo-fi atmosferli satranç deneyimi.',
+        difficultyLabel: 'Zorluk:',
+        easy1: 'Kolay (Derinlik 1)',
+        medium2: 'Orta (Derinlik 2)',
+        hard3: 'Zor (Derinlik 3)',
+        veryHard4: 'Çok Zor (Derinlik 4 - Yavaş)',
+        startGame: 'Oyuna Başla',
+        // Sidebar
+        botBlack: 'Bot (Siyah)',
+        botWhite: 'Bot (Beyaz)',
+        youWhite: 'Sen (Beyaz)',
+        youBlack: 'Sen (Siyah)',
+        waiting: 'Bekleniyor...',
+        yourTurnWaiting: 'Sıra sende mi? Bekleniyor...',
+        botDifficulty: 'Bot Zorluğu',
+        easy: 'Kolay',
+        medium: 'Orta',
+        hard: 'Zor',
+        veryHard: 'Çok Zor',
+        restart: 'Yeniden Başlat',
+        switchSide: 'Taraf Değiştir',
+        language: 'Dil',
+        // Right panel
+        moveHistory: 'Hamle Geçmişi',
+        volumeLevel: 'Ses Seviyesi',
+        // Game status
+        thinking: 'Düşünüyor...',
+        calculating: 'Hesaplanıyor...',
+        yourTurn: 'Sıra sende',
+        gameOver: 'Oyun Bitti',
+        white: 'Beyaz',
+        black: 'Siyah',
+        checkmate: (color) => `Oyun Bitti, ${color} mat oldu.`,
+        draw: 'Oyun Bitti, Berabere (Draw)',
+        turnOf: (color) => `${color}'ın Sırası`,
+        check: ', Şah!',
+        // Toasts
+        gameStarted: 'Oyun Başladı! İlk hamle beyazın.',
+        gameReset: 'Oyun sıfırlandı.',
+        difficultyUpdated: 'Zorluk seviyesi güncellendi.',
+        sideChanged: (color) => `Taraf değiştirildi. Sizin renginiz: ${color}`,
+        gameRestarted: 'Oyun yeniden başladı!',
+        // Game Over Modal
+        won: (name) => `${name} Kazandı!`,
+        checkmateEnd: 'Mat ile oyun sona erdi',
+        drawTitle: 'Berabere!',
+        stalemate: 'Pat — hamle yapılamıyor',
+        threefold: 'Üç kere tekrar',
+        insufficientMaterial: 'Yetersiz malzeme',
+        drawEnd: 'Oyun berabere bitti',
+        playAgain: 'Yeniden Oyna',
+        adjustDifficulty: 'Zorluğu Ayarla',
+    },
+    en: {
+        // Overlay
+        overlayDesc: 'A clean, challenging chess experience with lo-fi vibes.',
+        difficultyLabel: 'Difficulty:',
+        easy1: 'Easy (Depth 1)',
+        medium2: 'Medium (Depth 2)',
+        hard3: 'Hard (Depth 3)',
+        veryHard4: 'Very Hard (Depth 4 - Slow)',
+        startGame: 'Start Game',
+        // Sidebar
+        botBlack: 'Bot (Black)',
+        botWhite: 'Bot (White)',
+        youWhite: 'You (White)',
+        youBlack: 'You (Black)',
+        waiting: 'Waiting...',
+        yourTurnWaiting: 'Your turn? Waiting...',
+        botDifficulty: 'Bot Difficulty',
+        easy: 'Easy',
+        medium: 'Medium',
+        hard: 'Hard',
+        veryHard: 'Very Hard',
+        restart: 'Restart',
+        switchSide: 'Switch Side',
+        language: 'Language',
+        // Right panel
+        moveHistory: 'Move History',
+        volumeLevel: 'Volume',
+        // Game status
+        thinking: 'Thinking...',
+        calculating: 'Calculating...',
+        yourTurn: 'Your turn',
+        gameOver: 'Game Over',
+        white: 'White',
+        black: 'Black',
+        checkmate: (color) => `Game Over, ${color} is checkmated.`,
+        draw: 'Game Over, Draw',
+        turnOf: (color) => `${color}'s Turn`,
+        check: ', Check!',
+        // Toasts
+        gameStarted: 'Game Started! White moves first.',
+        gameReset: 'Game reset.',
+        difficultyUpdated: 'Difficulty updated.',
+        sideChanged: (color) => `Side changed. Your color: ${color}`,
+        gameRestarted: 'Game restarted!',
+        // Game Over Modal
+        won: (name) => `${name} Wins!`,
+        checkmateEnd: 'Game ended by checkmate',
+        drawTitle: 'Draw!',
+        stalemate: 'Stalemate — no legal moves',
+        threefold: 'Threefold repetition',
+        insufficientMaterial: 'Insufficient material',
+        drawEnd: 'Game ended in a draw',
+        playAgain: 'Play Again',
+        adjustDifficulty: 'Adjust Difficulty',
+    }
+};
+
+let currentLang = localStorage.getItem('chessLang') || 'tr';
+
+function t(key, ...args) {
+    const val = translations[currentLang][key];
+    if (typeof val === 'function') return val(...args);
+    return val || key;
+}
+
+function applyLanguage() {
+    // Update all elements with data-i18n attribute
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        const text = translations[currentLang][key];
+        if (text && typeof text === 'string') {
+            el.textContent = text;
+        }
+    });
+    // Update title attributes
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+        const key = el.getAttribute('data-i18n-title');
+        const text = translations[currentLang][key];
+        if (text && typeof text === 'string') {
+            el.title = text;
+        }
+    });
+    // Update lang toggle button labels (sidebar + overlay)
+    const langLabel = document.getElementById('langLabel');
+    if (langLabel) {
+        langLabel.textContent = currentLang === 'tr' ? 'EN' : 'TR';
+    }
+    const overlayLangLabel = document.getElementById('overlayLangLabel');
+    if (overlayLangLabel) {
+        overlayLangLabel.textContent = currentLang === 'tr' ? 'EN' : 'TR';
+    }
+    // Update html lang attribute
+    document.documentElement.lang = currentLang === 'tr' ? 'tr' : 'en';
+}
+
 // Variables
 let board = null;
 let game = new Chess();
@@ -59,6 +213,43 @@ const config = {
 
 board = Chessboard('myBoard', config);
 
+// --- Apply saved language on page load ---
+applyLanguage();
+
+// --- Helper: Update player name labels based on current color + language ---
+function updatePlayerNames() {
+    const userName = document.getElementById('userName');
+    const botName = document.getElementById('botName');
+    if (playerColor === 'w') {
+        userName.textContent = t('youWhite');
+        userName.setAttribute('data-i18n', 'youWhite');
+        botName.textContent = t('botBlack');
+        botName.setAttribute('data-i18n', 'botBlack');
+    } else {
+        userName.textContent = t('youBlack');
+        userName.setAttribute('data-i18n', 'youBlack');
+        botName.textContent = t('botWhite');
+        botName.setAttribute('data-i18n', 'botWhite');
+    }
+}
+
+// --- Language Toggle ---
+function toggleLanguage() {
+    currentLang = currentLang === 'tr' ? 'en' : 'tr';
+    localStorage.setItem('chessLang', currentLang);
+    applyLanguage();
+    updatePlayerNames();
+    // Re-apply dynamic bot status text
+    if (game.game_over()) {
+        botStatus.innerText = t('gameOver');
+    } else {
+        botStatus.innerText = game.turn() !== playerColor ? t('thinking') : t('yourTurn');
+    }
+}
+
+document.getElementById('langToggleBtn').addEventListener('click', toggleLanguage);
+document.getElementById('overlayLangBtn').addEventListener('click', toggleLanguage);
+
 // --- Prevent mobile scroll when touching the board ---
 const boardEl = document.getElementById('myBoard');
 boardEl.addEventListener('touchmove', function(e) {
@@ -106,7 +297,7 @@ function handleSquareTap(square) {
                 board.position(game.fen());
                 updateStatus();
                 updateMoveHistoryUI();
-                botStatus.innerText = "Düşünüyor...";
+                botStatus.innerText = t('thinking');
                 setTimeout(makeBotMove, 300);
                 return;
             }
@@ -232,7 +423,7 @@ startGameBtn.addEventListener('click', () => {
     setTimeout(() => {
         document.getElementById('inGameDifficulty').value = botDepth;
         startOverlay.style.display = 'none';
-        showToast("Oyun Başladı! İlk hamle beyazın.");
+        showToast(t('gameStarted'));
         
         loadTrack(0);
         lofiPlayer.volume = volumeSlider.value;
@@ -375,7 +566,7 @@ progressBar.addEventListener('input', (e) => {
 document.getElementById('inGameDifficulty').addEventListener('change', (e) => {
     botDepth = parseInt(e.target.value);
     difficultySelect.value = botDepth;
-    showToast(`Zorluk seviyesi güncellendi.`);
+    showToast(t('difficultyUpdated'));
 });
 
 document.getElementById('resetBtn').addEventListener('click', () => {
@@ -384,13 +575,14 @@ document.getElementById('resetBtn').addEventListener('click', () => {
     board.start();
     clearHighlights();
     _prevCheckSquare = null;
+    updatePlayerNames();
     updateStatus();
     moveHistoryEl.innerHTML = '';
     _renderedMoveCount = 0;
     moveCount = 1;
-    showToast("Oyun sıfırlandı.");
+    showToast(t('gameReset'));
     if (playerColor === 'b') {
-        botStatus.innerText = "Düşünüyor...";
+        botStatus.innerText = t('thinking');
         window.setTimeout(makeBotMove, 300);
     }
 });
@@ -399,14 +591,7 @@ document.getElementById('switchSideBtn').addEventListener('click', () => {
     hideGameOverModal();
     playerColor = playerColor === 'w' ? 'b' : 'w';
     board.orientation(playerColor === 'w' ? 'white' : 'black');
-    
-    if (playerColor === 'w') {
-        document.querySelector('.user-info .details .name').innerText = "Sen (Beyaz)";
-        document.querySelector('.bot-info .details .name').innerText = "Bot (Siyah)";
-    } else {
-        document.querySelector('.user-info .details .name').innerText = "Sen (Siyah)";
-        document.querySelector('.bot-info .details .name').innerText = "Bot (Beyaz)";
-    }
+    updatePlayerNames();
 
     game.reset();
     board.start();
@@ -416,10 +601,10 @@ document.getElementById('switchSideBtn').addEventListener('click', () => {
     moveHistoryEl.innerHTML = '';
     _renderedMoveCount = 0;
     moveCount = 1;
-    showToast(`Taraf değiştirildi. Sizin renginiz: ${playerColor === 'w' ? 'Beyaz' : 'Siyah'}`);
+    showToast(t('sideChanged', playerColor === 'w' ? t('white') : t('black')));
     
     if (playerColor === 'b') {
-        botStatus.innerText = "Düşünüyor...";
+        botStatus.innerText = t('thinking');
         window.setTimeout(makeBotMove, 300);
     }
 });
@@ -457,7 +642,7 @@ function onDrop(source, target) {
     updateMoveHistoryUI();
 
     // Bot'un oynaması için bekle
-    botStatus.innerText = "Düşünüyor...";
+    botStatus.innerText = t('thinking');
     window.setTimeout(makeBotMove, 300);
 }
 
@@ -472,32 +657,30 @@ function updateStatus() {
     highlightCheck();
 
     let status = '';
-    let moveColor = game.turn() === 'w' ? 'Beyaz' : 'Siyah';
+    let moveColor = game.turn() === 'w' ? t('white') : t('black');
 
     if (game.in_checkmate()) {
-        status = `Oyun Bitti, ${moveColor} mat oldu.`;
+        status = t('checkmate', moveColor);
         showToast(status);
-        botStatus.innerText = "Oyun Bitti";
+        botStatus.innerText = t('gameOver');
         // Determine winner: the side that just got mated is game.turn()
         const loserColor = game.turn();
         if (loserColor === playerColor) {
-            // Player lost
             showGameOverModal('lose');
         } else {
-            // Player won
             showGameOverModal('win');
         }
     } else if (game.in_draw()) {
-        status = 'Oyun Bitti, Berabere (Draw)';
+        status = t('draw');
         showToast(status);
-        botStatus.innerText = "Oyun Bitti";
+        botStatus.innerText = t('gameOver');
         showGameOverModal('draw');
     } else {
-        status = `${moveColor}'ın Sırası`;
+        status = t('turnOf', moveColor);
         if (game.in_check()) {
-            status += ', Şah!';
+            status += t('check');
         }
-        botStatus.innerText = game.turn() !== playerColor ? "Düşünüyor..." : "Sıra sende";
+        botStatus.innerText = game.turn() !== playerColor ? t('thinking') : t('yourTurn');
     }
 }
 
@@ -508,29 +691,29 @@ function showGameOverModal(result) {
     gameOverIcon.className = 'game-over-icon'; // reset classes
 
     if (result === 'win') {
-        const winnerName = playerColor === 'w' ? 'Beyaz' : 'Siyah';
+        const winnerName = playerColor === 'w' ? t('white') : t('black');
         gameOverIcon.innerHTML = '<i class="fa-solid fa-crown"></i>';
         gameOverIcon.classList.add('win');
-        gameOverTitle.textContent = `${winnerName} Kazandı!`;
-        gameOverSubtitle.textContent = 'Mat ile oyun sona erdi';
+        gameOverTitle.textContent = t('won', winnerName);
+        gameOverSubtitle.textContent = t('checkmateEnd');
     } else if (result === 'lose') {
-        const winnerName = playerColor === 'w' ? 'Siyah' : 'Beyaz';
+        const winnerName = playerColor === 'w' ? t('black') : t('white');
         gameOverIcon.innerHTML = '<i class="fa-solid fa-skull"></i>';
         gameOverIcon.classList.add('lose');
-        gameOverTitle.textContent = `${winnerName} Kazandı!`;
-        gameOverSubtitle.textContent = 'Mat ile oyun sona erdi';
+        gameOverTitle.textContent = t('won', winnerName);
+        gameOverSubtitle.textContent = t('checkmateEnd');
     } else {
         gameOverIcon.innerHTML = '<i class="fa-solid fa-handshake"></i>';
         gameOverIcon.classList.add('draw');
-        gameOverTitle.textContent = 'Berabere!';
+        gameOverTitle.textContent = t('drawTitle');
         if (game.in_stalemate()) {
-            gameOverSubtitle.textContent = 'Pat — hamle yapılamıyor';
+            gameOverSubtitle.textContent = t('stalemate');
         } else if (game.in_threefold_repetition()) {
-            gameOverSubtitle.textContent = 'Üç kere tekrar';
+            gameOverSubtitle.textContent = t('threefold');
         } else if (game.insufficient_material()) {
-            gameOverSubtitle.textContent = 'Yetersiz malzeme';
+            gameOverSubtitle.textContent = t('insufficientMaterial');
         } else {
-            gameOverSubtitle.textContent = 'Oyun berabere bitti';
+            gameOverSubtitle.textContent = t('drawEnd');
         }
     }
 
@@ -555,13 +738,14 @@ document.getElementById('gameOverReplay').addEventListener('click', () => {
     board.start();
     clearHighlights();
     _prevCheckSquare = null;
+    updatePlayerNames();
     updateStatus();
     moveHistoryEl.innerHTML = '';
     _renderedMoveCount = 0;
     moveCount = 1;
-    showToast('Oyun yeniden başladı!');
+    showToast(t('gameRestarted'));
     if (playerColor === 'b') {
-        botStatus.innerText = 'Düşünüyor...';
+        botStatus.innerText = t('thinking');
         window.setTimeout(makeBotMove, 300);
     }
 });
@@ -577,12 +761,12 @@ document.getElementById('gameOverDifficulty').addEventListener('click', () => {
     const diffDiv = document.createElement('div');
     diffDiv.className = 'game-over-difficulty-select';
     diffDiv.innerHTML = `
-        <label>Zorluk:</label>
+        <label>${t('difficultyLabel')}</label>
         <select id="gameOverDiffSelect">
-            <option value="1" ${botDepth === 1 ? 'selected' : ''}>Kolay</option>
-            <option value="2" ${botDepth === 2 ? 'selected' : ''}>Orta</option>
-            <option value="3" ${botDepth === 3 ? 'selected' : ''}>Zor</option>
-            <option value="4" ${botDepth === 4 ? 'selected' : ''}>Çok Zor</option>
+            <option value="1" ${botDepth === 1 ? 'selected' : ''}>${t('easy')}</option>
+            <option value="2" ${botDepth === 2 ? 'selected' : ''}>${t('medium')}</option>
+            <option value="3" ${botDepth === 3 ? 'selected' : ''}>${t('hard')}</option>
+            <option value="4" ${botDepth === 4 ? 'selected' : ''}>${t('veryHard')}</option>
         </select>
     `;
     actionsDiv.appendChild(diffDiv);
@@ -590,7 +774,7 @@ document.getElementById('gameOverDifficulty').addEventListener('click', () => {
         botDepth = parseInt(e.target.value);
         document.getElementById('inGameDifficulty').value = botDepth;
         difficultySelect.value = botDepth;
-        showToast(`Zorluk seviyesi güncellendi.`);
+        showToast(t('difficultyUpdated'));
     });
 });
 
@@ -598,14 +782,7 @@ document.getElementById('gameOverSwitch').addEventListener('click', () => {
     hideGameOverModal();
     playerColor = playerColor === 'w' ? 'b' : 'w';
     board.orientation(playerColor === 'w' ? 'white' : 'black');
-    
-    if (playerColor === 'w') {
-        document.querySelector('.user-info .details .name').innerText = 'Sen (Beyaz)';
-        document.querySelector('.bot-info .details .name').innerText = 'Bot (Siyah)';
-    } else {
-        document.querySelector('.user-info .details .name').innerText = 'Sen (Siyah)';
-        document.querySelector('.bot-info .details .name').innerText = 'Bot (Beyaz)';
-    }
+    updatePlayerNames();
 
     game.reset();
     board.start();
@@ -615,10 +792,10 @@ document.getElementById('gameOverSwitch').addEventListener('click', () => {
     moveHistoryEl.innerHTML = '';
     _renderedMoveCount = 0;
     moveCount = 1;
-    showToast(`Taraf değiştirildi. Sizin renginiz: ${playerColor === 'w' ? 'Beyaz' : 'Siyah'}`);
+    showToast(t('sideChanged', playerColor === 'w' ? t('white') : t('black')));
     
     if (playerColor === 'b') {
-        botStatus.innerText = 'Düşünüyor...';
+        botStatus.innerText = t('thinking');
         window.setTimeout(makeBotMove, 300);
     }
 });
@@ -739,7 +916,7 @@ botWorker.onmessage = function(e) {
 function makeBotMove() {
     if (game.game_over()) return;
     
-    botStatus.innerText = "Hesaplanıyor...";
+    botStatus.innerText = t('calculating');
     
     botWorker.postMessage({
         fen: game.fen(),
