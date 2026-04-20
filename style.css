@@ -523,6 +523,7 @@ body {
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease;
+    will-change: opacity;
 }
 
 .qr-overlay.visible {
@@ -538,6 +539,7 @@ body {
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
     transform: scale(0.85);
     transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    will-change: transform;
 }
 
 .qr-overlay.visible .qr-popup {
@@ -898,6 +900,7 @@ body {
         transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
         overflow-y: auto;
         padding: 4.5rem 1.5rem 1.5rem;
+        will-change: transform;
     }
 
     .sidebar.open {
@@ -918,6 +921,7 @@ body {
         transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
         overflow-y: auto;
         padding-top: 1rem;
+        will-change: transform;
     }
 
     .right-panel.open {
@@ -954,6 +958,7 @@ body {
         padding: 3rem 1.5rem 2rem;
         margin: 1rem;
         border-radius: 12px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5); /* Reduced shadow for mobile FPS */
     }
 
     .overlay-content h1 {
@@ -1061,6 +1066,7 @@ body {
     .game-over-modal {
         padding: 2rem 1.5rem;
         border-radius: 16px;
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5); /* Reduced shadow for mobile */
     }
 
     .game-over-icon {
@@ -1080,6 +1086,11 @@ body {
     .game-over-btn {
         padding: 0.75rem 1.2rem;
         font-size: 0.9rem;
+    }
+
+    /* Reduce QR popup shadow on mobile */
+    .qr-popup {
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5);
     }
 }
 
