@@ -1027,3 +1027,22 @@ document.addEventListener('touchend', (e) => {
         closeAllDrawers();
     }
 }, { passive: true });
+
+// --- QR CODE POPUP ---
+const qrOverlay = document.getElementById('qrOverlay');
+const qrBtn = document.getElementById('qrBtn');
+const qrClose = document.getElementById('qrClose');
+
+qrBtn.addEventListener('click', () => {
+    qrOverlay.classList.add('visible');
+});
+
+qrClose.addEventListener('click', () => {
+    qrOverlay.classList.remove('visible');
+});
+
+qrOverlay.addEventListener('click', (e) => {
+    if (e.target === qrOverlay) {
+        qrOverlay.classList.remove('visible');
+    }
+});
