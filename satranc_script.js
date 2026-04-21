@@ -185,10 +185,15 @@ const gameOverIcon = document.getElementById('gameOverIcon');
 const gameOverTitle = document.getElementById('gameOverTitle');
 const gameOverSubtitle = document.getElementById('gameOverSubtitle');
 
-// Spotify Elements
-const spotifyInput = document.getElementById('spotifyInput');
-const loadSpotifyBtn = document.getElementById('loadSpotifyBtn');
-const spotifyIframe = document.getElementById('spotifyIframe');
+// Lo-Fi Player Elements
+const lofiPlayBtn = document.getElementById('lofiPlayBtn');
+const lofiVolume = document.getElementById('lofiVolume');
+const lofiStatus = document.getElementById('lofiStatus');
+
+// Internal Audio Stream
+const lofiAudio = new Audio('https://stream.zenolive.com/0r0xa792kwzuv'); // Known reliable 24/7 lofi stream
+lofiAudio.crossOrigin = "anonymous";
+let isLofiPlaying = false;
 
 // Initialize board configuration
 const config = {
@@ -418,20 +423,36 @@ startGameBtn.addEventListener('click', () => {
 
  
 
-// --- Spotify Logic ---
-loadSpotifyBtn.addEventListener('click', () => {
-    let url = spotifyInput.value.trim();
-    if (!url) return;
-    try {
-        const urlObj = new URL(url);
-        if (urlObj.hostname === 'open.spotify.com') {
-            const path = urlObj.pathname;
-            const newSrc = `https://open.spotify.com/embed${path}?utm_source=generator&theme=0`;
-            spotifyIframe.src = newSrc;
-        }
-    } catch (e) {
-        console.log("Invalid Spotify URL");
+// --- Lo-Fi Player Logic ---
+lofiPlayBtn.addEventListener('click', () => {
+    if (!isLofiPlaying) {
+        lofiAudio.volume = lofiVolume.value;
+        lofiAudio.play().then(() => {
+            isLofiPlaying = true;
+            lofiPlayBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+            lofiStatus.textContent = "Canlı (24/7)";
+        }).catch(err => {
+            console.error("Playback error:", err);
+            showToast("Müzik başlatılamadı. Tarayıcı izni gerekiyor olabilir.");
+        });
+    } else {
+        lofiAudio.pause();
+        isLofiPlaying = false;
+        lofiPlayBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+        lofiStatus.textContent = "Duraklatıldı";
     }
+});
+
+lofiVolume.addEventListener('input', (e) => {
+    lofiAudio.volume = e.target.value;
+});
+
+// Optional buffering status handling
+lofiAudio.addEventListener('waiting', () => {
+    if (isLofiPlaying) lofiStatus.textContent = "Bağlanıyor...";
+});
+lofiAudio.addEventListener('playing', () => {
+    if (isLofiPlaying) lofiStatus.textContent = "Canlı (24/7)";
 });
 
 document.getElementById('inGameDifficulty').addEventListener('change', (e) => {

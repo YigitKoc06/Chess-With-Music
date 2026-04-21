@@ -114,13 +114,26 @@
                 <!-- Move pairs will be dynamically injected here -->
             </div>
             <!-- Music Player -->
-            <div class="music-player">
-                <div class="spotify-input-container">
-                    <input type="text" id="spotifyInput" placeholder="Spotify Linki (Track, Playlist vb.)" data-i18n-placeholder="spotifyInputPlaceholder">
-                    <button id="loadSpotifyBtn" title="Yükle" data-i18n-title="loadSpotifyBtn"><i class="fa-solid fa-check"></i></button>
+            <div class="music-player lofi-player">
+                <div class="lofi-info">
+                    <div class="lofi-cover">
+                        <i class="fa-solid fa-headphones"></i>
+                    </div>
+                    <div class="lofi-details">
+                        <div class="lofi-title">Lo-Fi Radio</div>
+                        <div class="lofi-subtitle" id="lofiStatus">Duraklatıldı</div>
+                    </div>
                 </div>
-                <!-- Default Lofi Playlist, lazy loaded to prevent UI block -->
-                <iframe id="spotifyIframe" style="border-radius:12px" src="https://open.spotify.com/embed/playlist/0vvXsWCC9xrXsKd4FyS8kM?utm_source=generator&theme=0" width="100%" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+                <div class="lofi-controls">
+                    <button id="lofiPlayBtn" class="lofi-btn" title="Oynat/Duraklat">
+                        <i class="fa-solid fa-play"></i>
+                    </button>
+                    <div class="lofi-volume-wrapper">
+                        <i class="fa-solid fa-volume-low lofi-vol-icon"></i>
+                        <input type="range" id="lofiVolume" class="lofi-volume" min="0" max="1" step="0.01" value="0.5">
+                        <i class="fa-solid fa-volume-high lofi-vol-icon"></i>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
