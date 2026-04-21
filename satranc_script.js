@@ -769,7 +769,7 @@ function findKingSquare(color) {
 
 // --- BOT LOGIC (Web Worker) ---
 
-const botWorker = new Worker('worker.js');
+const botWorker = new Worker('satranc_worker.js');
 // Pre-warm: force chess.js download now, not on first move
 botWorker.postMessage({ type: 'warmup' });
 
