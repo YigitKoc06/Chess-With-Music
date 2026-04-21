@@ -125,7 +125,14 @@ function orderMoves(g) {
 // Transposition table — caches evaluated positions to avoid redundant work
 let transpositionTable = {};
 
+let startTime = 0;
+const TIME_LIMIT = 1500; // 1.5 saniyelik kesin süre sınırı!
+
 function minimax(g, depth, alpha, beta, isMaximizingPlayer) {
+    if (Date.now() - startTime > TIME_LIMIT) {
+        throw new Error("timeout");
+    }
+
     // Check for terminal positions using lightweight move generation
     // g.moves() returns empty array for both checkmate and stalemate
     const possibleMoves = orderMoves(g);
@@ -183,6 +190,7 @@ function minimax(g, depth, alpha, beta, isMaximizingPlayer) {
 }
 
 function getBestMove(g, depth, isBotWhite, history) {
+    startTime = Date.now(); // Hesaplama başlangıç süresini kaydet
     // Clear transposition table for each new move calculation
     transpositionTable = {};
 
@@ -190,14 +198,31 @@ function getBestMove(g, depth, isBotWhite, history) {
     const key = history.join(',');
     const bookMoves = openingBook[key];
     if (bookMoves) {
-        // Verify the book move is legal in current position
-        const pick = bookMoves[Math.floor(Math.random() * bookMoves.length)];
-        const testMove = g.move(pick);
-        if (testMove) {
-            g.undo();
-            return pick;
+        // Shuffle book moves
+        const shuffled = bookMoves.slice().sort(() => Math.random() - 0.5);
+        for (let pick of shuffled) {
+            const testMove = g.move(pick);
+            if (testMove) {
+                g.undo();
+                return pick;
+            }
         }
-        g.undo(); // safety
+    }
+
+    // Early game has huge branching factor. Deep searches take too long without captures/forcing moves.
+    let searchDepth = depth;
+    let pieceCount = 0;
+    const brd = g.board();
+    for(let r=0; r<8; r++) {
+        for(let c=0; c<8; c++) {
+            if(brd[r][c]) pieceCount++;
+        }
+    }
+    
+    // If there are too many pieces (>20), depth 4+ is mathematically impossible to process fast in JS.
+    // So we clamp it dynamically.
+    if (pieceCount > 20 && searchDepth > 3) {
+        searchDepth = 3;
     }
 
     // Check for draw conditions at root level only (these are expensive)
@@ -228,26 +253,36 @@ function getBestMove(g, depth, isBotWhite, history) {
         const move = possibleMoves[i];
         g.move(move.san);
         
-        let boardValue = minimax(g, depth - 1, alpha, beta, !isBotWhite);
-        
-        g.undo();
+        try {
+            let boardValue = minimax(g, searchDepth - 1, alpha, beta, !isBotWhite);
+            
+            g.undo();
 
-        if (isBotWhite) {
-            if (boardValue > bestValue) {
-                bestValue = boardValue;
-                bestMove = move.san;
+            if (isBotWhite) {
+                if (boardValue > bestValue) {
+                    bestValue = boardValue;
+                    bestMove = move.san;
+                }
+                alpha = Math.max(alpha, bestValue);
+            } else {
+                if (boardValue < bestValue) {
+                    bestValue = boardValue;
+                    bestMove = move.san;
+                }
+                beta = Math.min(beta, bestValue);
             }
-            alpha = Math.max(alpha, bestValue);
-        } else {
-            if (boardValue < bestValue) {
-                bestValue = boardValue;
-                bestMove = move.san;
+        } catch (e) {
+            g.undo(); // Her ihtimale karşı geri al
+            if (e.message === "timeout") {
+                // Zaman doldu, en iyi bulduğun hamleyle döngüyü zorla bitir
+                break;
+            } else {
+                throw e; // Başka bir hataysa fırlat
             }
-            beta = Math.min(beta, bestValue);
         }
     }
 
-    return bestMove;
+    return bestMove || possibleMoves[0]?.san;
 }
 
 onmessage = function(e) {

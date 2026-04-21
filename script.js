@@ -28,6 +28,8 @@ const translations = {
         language: 'Dil',
         // Right panel
         moveHistory: 'Hamle Geçmişi',
+        spotifyInputPlaceholder: 'Spotify Linki Girin...',
+        loadSpotifyBtn: 'Yükle',
         volumeLevel: 'Ses Seviyesi',
         // Game status
         thinking: 'Düşünüyor...',
@@ -83,6 +85,8 @@ const translations = {
         language: 'Language',
         // Right panel
         moveHistory: 'Move History',
+        spotifyInputPlaceholder: 'Enter Spotify Link...',
+        loadSpotifyBtn: 'Load',
         volumeLevel: 'Volume',
         // Game status
         thinking: 'Thinking...',
@@ -139,6 +143,14 @@ function applyLanguage() {
             el.title = text;
         }
     });
+    // Update placeholders
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        const text = translations[currentLang][key];
+        if (text && typeof text === 'string') {
+            el.placeholder = text;
+        }
+    });
     // Update lang toggle button labels (sidebar + overlay)
     const langLabel = document.getElementById('langLabel');
     if (langLabel) {
@@ -173,33 +185,10 @@ const gameOverIcon = document.getElementById('gameOverIcon');
 const gameOverTitle = document.getElementById('gameOverTitle');
 const gameOverSubtitle = document.getElementById('gameOverSubtitle');
 
-// Music Player Elements
-const playPauseBtn = document.getElementById('playPauseBtn');
-const prevTrackBtn = document.getElementById('prevTrackBtn');
-const nextTrackBtn = document.getElementById('nextTrackBtn');
-const rewindBtn = document.getElementById('rewindBtn');
-const repeatBtn = document.getElementById('repeatBtn');
-const trackTitleSpan = document.getElementById('trackTitle');
-const musicSpinIcon = document.getElementById('musicSpinIcon');
-const lofiPlayer = document.getElementById('lofiPlayer');
-const toggleMuteBtn = document.getElementById('toggleMute');
-const volumeSlider = document.getElementById('volumeSlider');
-const progressBar = document.getElementById('progressBar');
-const currentTimeSpan = document.getElementById('currentTime');
-const durationTimeSpan = document.getElementById('durationTime');
-
-let isMuted = false;
-let isPlaying = false;
-let isLoopingSingle = false;
-let currentTrackIndex = 0;
-
-const playlist = [
-    { title: "Below Zero", src: "Below Zero.mp3" },
-    { title: "New Moon", src: "New Moon.mp3" },
-    { title: "On It Goes", src: "On It Goes.mp3" },
-    { title: "Sebastian Kamae - Solitude", src: "Sebastian Kamae - Solitude.mp3" },
-    { title: "Swept Away", src: "Swept Away.mp3" }
-];
+// Spotify Elements
+const spotifyInput = document.getElementById('spotifyInput');
+const loadSpotifyBtn = document.getElementById('loadSpotifyBtn');
+const spotifyIframe = document.getElementById('spotifyIframe');
 
 // Initialize board configuration
 const config = {
@@ -424,142 +413,24 @@ startGameBtn.addEventListener('click', () => {
         document.getElementById('inGameDifficulty').value = botDepth;
         startOverlay.style.display = 'none';
         showToast(t('gameStarted'));
-        
-        loadTrack(0);
-        lofiPlayer.volume = volumeSlider.value;
-        lofiPlayer.play().then(() => {
-            isPlaying = true;
-            updatePlayPauseBtn();
-        }).catch(e => console.log("Audio play error:", e));
-        
-        isMuted = false;
-        lofiPlayer.muted = false;
-        updateMuteButton();
     }, 500);
 });
 
  
 
-// --- Music Player Logic ---
-
-toggleMuteBtn.addEventListener('click', () => {
-    isMuted = !isMuted;
-    lofiPlayer.muted = isMuted;
-    if (isMuted) {
-        volumeSlider.value = 0;
-    } else {
-        volumeSlider.value = lofiPlayer.volume || 0.3;
-    }
-    updateMuteButton();
-});
-
-volumeSlider.addEventListener('input', (e) => {
-    const val = parseFloat(e.target.value);
-    lofiPlayer.volume = val;
-    if (val > 0 && isMuted) {
-        isMuted = false;
-        lofiPlayer.muted = false;
-        updateMuteButton();
-    } else if (val === 0 && !isMuted) {
-        isMuted = true;
-        lofiPlayer.muted = true;
-        updateMuteButton();
-    }
-});
-
-function updateMuteButton() {
-    toggleMuteBtn.innerHTML = isMuted 
-        ? '<i class="fa-solid fa-volume-xmark"></i>'
-        : '<i class="fa-solid fa-volume-high"></i>';
-}
-
-function loadTrack(index) {
-    const track = playlist[index];
-    lofiPlayer.src = track.src;
-    trackTitleSpan.innerText = track.title;
-}
-
-function updatePlayPauseBtn() {
-    playPauseBtn.innerHTML = isPlaying 
-        ? '<i class="fa-solid fa-pause"></i>' 
-        : '<i class="fa-solid fa-play"></i>';
-    musicSpinIcon.style.animationPlayState = isPlaying ? 'running' : 'paused';
-}
-
-lofiPlayer.addEventListener('ended', () => {
-    if (isLoopingSingle) {
-        lofiPlayer.currentTime = 0;
-        lofiPlayer.play();
-    } else {
-        currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
-        loadTrack(currentTrackIndex);
-        lofiPlayer.play();
-    }
-});
-
-playPauseBtn.addEventListener('click', () => {
-    if (isPlaying) {
-        lofiPlayer.pause();
-    } else {
-        lofiPlayer.play();
-    }
-    isPlaying = !isPlaying;
-    updatePlayPauseBtn();
-});
-
-prevTrackBtn.addEventListener('click', () => {
-    currentTrackIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
-    loadTrack(currentTrackIndex);
-    if (isPlaying) lofiPlayer.play();
-});
-
-nextTrackBtn.addEventListener('click', () => {
-    currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
-    loadTrack(currentTrackIndex);
-    if (isPlaying) lofiPlayer.play();
-});
-
-rewindBtn.addEventListener('click', () => {
-    lofiPlayer.currentTime = 0;
-});
-
-repeatBtn.addEventListener('click', () => {
-    isLoopingSingle = !isLoopingSingle;
-    repeatBtn.style.color = isLoopingSingle ? "var(--accent)" : "var(--text-primary)";
-});
-
-function formatTime(seconds) {
-    if (isNaN(seconds)) return "0:00";
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-}
-
-let _lastTimeUpdateSec = -1;
-lofiPlayer.addEventListener('timeupdate', () => {
-    const current = lofiPlayer.currentTime;
-    const duration = lofiPlayer.duration;
-    
-    if (duration) {
-        // Only update DOM when the displayed second changes
-        const currentSec = Math.floor(current);
-        if (currentSec === _lastTimeUpdateSec) return;
-        _lastTimeUpdateSec = currentSec;
-
-        progressBar.value = (current / duration) * 100;
-        currentTimeSpan.textContent = formatTime(current);
-        durationTimeSpan.textContent = formatTime(duration);
-    }
-});
-
-lofiPlayer.addEventListener('loadedmetadata', () => {
-    durationTimeSpan.innerText = formatTime(lofiPlayer.duration);
-});
-
-progressBar.addEventListener('input', (e) => {
-    const duration = lofiPlayer.duration;
-    if (duration) {
-        lofiPlayer.currentTime = (e.target.value / 100) * duration;
+// --- Spotify Logic ---
+loadSpotifyBtn.addEventListener('click', () => {
+    let url = spotifyInput.value.trim();
+    if (!url) return;
+    try {
+        const urlObj = new URL(url);
+        if (urlObj.hostname === 'open.spotify.com') {
+            const path = urlObj.pathname;
+            const newSrc = `https://open.spotify.com/embed${path}?utm_source=generator&theme=0`;
+            spotifyIframe.src = newSrc;
+        }
+    } catch (e) {
+        console.log("Invalid Spotify URL");
     }
 });
 
@@ -898,7 +769,7 @@ function findKingSquare(color) {
 
 // --- BOT LOGIC (Web Worker) ---
 
-const botWorker = new Worker('worker.js');
+const botWorker = new Worker('worker.js?v=' + Date.now());
 // Pre-warm: force chess.js download now, not on first move
 botWorker.postMessage({ type: 'warmup' });
 
