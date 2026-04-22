@@ -445,6 +445,8 @@ document.getElementById('resetBtn').addEventListener('click', () => {
     game.reset();
     board.start();
     clearHighlights();
+    $('#myBoard .in-check').removeClass('in-check');
+    _prevCheckSquare = null;
     updatePlayerNames();
     updateStatus();
     moveHistoryEl.innerHTML = '';
@@ -466,6 +468,8 @@ document.getElementById('switchSideBtn').addEventListener('click', () => {
     game.reset();
     board.start();
     clearHighlights();
+    $('#myBoard .in-check').removeClass('in-check');
+    _prevCheckSquare = null;
     updateStatus();
     moveHistoryEl.innerHTML = '';
     _renderedMoveCount = 0;
@@ -606,6 +610,8 @@ document.getElementById('gameOverReplay').addEventListener('click', () => {
     game.reset();
     board.start();
     clearHighlights();
+    $('#myBoard .in-check').removeClass('in-check');
+    _prevCheckSquare = null;
     updatePlayerNames();
     updateStatus();
     moveHistoryEl.innerHTML = '';
@@ -655,6 +661,8 @@ document.getElementById('gameOverSwitch').addEventListener('click', () => {
     game.reset();
     board.start();
     clearHighlights();
+    $('#myBoard .in-check').removeClass('in-check');
+    _prevCheckSquare = null;
     updateStatus();
     moveHistoryEl.innerHTML = '';
     _renderedMoveCount = 0;
