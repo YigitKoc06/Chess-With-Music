@@ -189,6 +189,7 @@ body {
     justify-content: center;
     align-items: center;
     font-size: 1.5rem;
+    flex-shrink: 0;
 }
 
 .bot-avatar { color: #f39c12; }
