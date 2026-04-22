@@ -877,7 +877,7 @@ body {
     background: var(--bg-panel);
     border-radius: 16px;
     width: 90%;
-    max-width: 550px;
+    max-width: 800px;
     max-height: 85vh;
     display: flex;
     flex-direction: column;
@@ -904,7 +904,7 @@ body {
 
 .htp-header h2 {
     margin: 0;
-    font-size: 1.4rem;
+    font-size: 1.6rem;
     color: var(--text-primary);
 }
 
@@ -965,16 +965,16 @@ body {
 .htp-pieces-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 0.8rem;
+    gap: 1.2rem;
 }
 
 .htp-piece-card {
     display: flex;
-    align-items: center;
-    gap: 1rem;
+    align-items: flex-start;
+    gap: 1.5rem;
     background: rgba(255,255,255,0.02);
-    padding: 0.8rem;
-    border-radius: 8px;
+    padding: 1.2rem;
+    border-radius: 12px;
     border: 1px solid rgba(255,255,255,0.03);
     transition: background 0.2s;
 }
@@ -984,14 +984,16 @@ body {
 }
 
 .htp-piece-info h4 {
-    margin: 0 0 0.2rem 0;
-    font-size: 1.05rem;
+    margin: 0 0 0.4rem 0;
+    font-size: 1.25rem;
     color: var(--accent);
 }
 
 .htp-piece-info p {
     margin: 0;
-    font-size: 0.85rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--text-secondary);
 }
 
 /* Mini Board for Piece Movement */
@@ -999,13 +1001,13 @@ body {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     grid-template-rows: repeat(5, 1fr);
-    width: 60px;
-    height: 60px;
+    width: 110px;
+    height: 110px;
     border: 1px solid rgba(255,255,255,0.1);
     border-radius: 4px;
     overflow: hidden;
     flex-shrink: 0;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
 }
 
 .mini-sq {
@@ -1019,14 +1021,15 @@ body {
 .mini-sq.light { background-color: #f0f0f5; }
 
 .mini-sq i {
-    font-size: 1.1rem;
+    font-size: 1.4rem;
     color: #111;
     z-index: 2;
+    line-height: 1;
 }
 
 .mini-sq .move-dot {
-    width: 30%;
-    height: 30%;
+    width: 28%;
+    height: 28%;
     background-color: var(--accent);
     border-radius: 50%;
     position: absolute;
