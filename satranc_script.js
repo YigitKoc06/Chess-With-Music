@@ -58,6 +58,25 @@ const translations = {
         drawEnd: 'Oyun berabere bitti',
         playAgain: 'Yeniden Oyna',
         adjustDifficulty: 'Zorluğu Ayarla',
+        // How to Play
+        howToPlay: 'Nasıl Oynanır?',
+        howToPlayTitle: 'Kurallar',
+        htpTitle: 'Satranç Nasıl Oynanır?',
+        htpGoalTitle: 'Oyunun Amacı',
+        htpGoalDesc: 'Oyunun amacı rakip şahı "mat" etmektir. Mat, şahın tehdit altında olması ve kaçacak güvenli hiçbir karesinin kalmaması durumudur.',
+        htpPiecesTitle: 'Taşların Hareketleri',
+        htpPawn: 'Piyon',
+        htpPawnDesc: 'İleriye bir kare gider. İlk hamlesinde iki kare gidebilir. Çaprazındaki taşı yer.',
+        htpRook: 'Kale',
+        htpRookDesc: 'Yatay ve dikey olarak istediği kadar gidebilir.',
+        htpKnight: 'At',
+        htpKnightDesc: '"L" şeklinde hareket eder. Diğer taşların üzerinden atlayabilen tek taştır.',
+        htpBishop: 'Fil',
+        htpBishopDesc: 'Çapraz olarak istediği kadar gidebilir. Bulunduğu rengin dışına çıkamaz.',
+        htpQueen: 'Vezir',
+        htpQueenDesc: 'En güçlü taştır. Yatay, dikey ve çapraz olarak istediği kadar gidebilir.',
+        htpKing: 'Şah',
+        htpKingDesc: 'En önemli taştır. Her yöne sadece bir kare gidebilir. Tehdit altındayken kaçmalıdır.'
     },
     en: {
         // Overlay
@@ -115,6 +134,25 @@ const translations = {
         drawEnd: 'Game ended in a draw',
         playAgain: 'Play Again',
         adjustDifficulty: 'Adjust Difficulty',
+        // How to Play
+        howToPlay: 'How to Play?',
+        howToPlayTitle: 'Rules',
+        htpTitle: 'How to Play Chess?',
+        htpGoalTitle: 'Goal of the Game',
+        htpGoalDesc: 'The goal is to "checkmate" the opponent\'s king. Checkmate happens when the king is under attack and has no safe square to move to.',
+        htpPiecesTitle: 'Piece Movements',
+        htpPawn: 'Pawn',
+        htpPawnDesc: 'Moves one square forward. Can move two squares on its first move. Captures diagonally.',
+        htpRook: 'Rook',
+        htpRookDesc: 'Moves horizontally and vertically as far as it wants.',
+        htpKnight: 'Knight',
+        htpKnightDesc: 'Moves in an "L" shape. The only piece that can jump over other pieces.',
+        htpBishop: 'Bishop',
+        htpBishopDesc: 'Moves diagonally as far as it wants. Stays on its original color.',
+        htpQueen: 'Queen',
+        htpQueenDesc: 'The most powerful piece. Moves horizontally, vertically, and diagonally as far as it wants.',
+        htpKing: 'King',
+        htpKingDesc: 'The most important piece. Moves only one square in any direction. Must escape when attacked.'
     }
 };
 
@@ -797,6 +835,113 @@ function findKingSquare(color) {
 const botWorker = new Worker('satranc_worker.js');
 // Pre-warm: force chess.js download now, not on first move
 botWorker.postMessage({ type: 'warmup' });
+
+// =============================================
+// HOW TO PLAY MODAL & MINI-BOARDS
+// =============================================
+const htpOverlay = document.getElementById('htpOverlay');
+const htpClose = document.getElementById('htpClose');
+const btnStart = document.getElementById('howToPlayBtnStart');
+const btnSidebar = document.getElementById('howToPlayBtnSidebar');
+
+function openHtpModal() {
+    if (htpOverlay) {
+        htpOverlay.classList.add('visible');
+        initMiniBoards();
+    }
+}
+
+function closeHtpModal() {
+    if (htpOverlay) {
+        htpOverlay.classList.remove('visible');
+    }
+}
+
+if (btnStart) btnStart.addEventListener('click', openHtpModal);
+if (btnSidebar) btnSidebar.addEventListener('click', openHtpModal);
+if (htpClose) htpClose.addEventListener('click', closeHtpModal);
+
+// Close on outside click
+if (htpOverlay) {
+    htpOverlay.addEventListener('click', (e) => {
+        if (e.target === htpOverlay) {
+            closeHtpModal();
+        }
+    });
+}
+
+let boardsInitialized = false;
+
+function generateMiniBoard(pieceId, moves, pieceClass) {
+    const board = document.getElementById(pieceId);
+    if (!board) return;
+    
+    let html = '';
+    for (let r = 0; r < 5; r++) {
+        for (let c = 0; c < 5; c++) {
+            const isLight = (r + c) % 2 === 0;
+            const bgClass = isLight ? 'light' : 'dark';
+            const isCenter = (r === 2 && c === 2);
+            let isMove = false;
+            
+            moves.forEach(m => {
+                if (m[0] === r && m[1] === c) isMove = true;
+            });
+            
+            let content = '';
+            if (isCenter) {
+                content = `<i class="fa-solid ${pieceClass}"></i>`;
+            } else if (isMove) {
+                content = `<div class="move-dot"></div>`;
+            }
+            
+            html += `<div class="mini-sq ${bgClass}">${content}</div>`;
+        }
+    }
+    board.innerHTML = html;
+}
+
+function initMiniBoards() {
+    if (boardsInitialized) return;
+    
+    // Coordinates are row, col from top-left (0,0). Center is 2,2.
+    const pawnMoves = [[1, 2]]; // Up one
+    generateMiniBoard('mb-pawn', pawnMoves, 'fa-chess-pawn');
+    
+    const rookMoves = [
+        [0,2], [1,2], [3,2], [4,2], // vertical
+        [2,0], [2,1], [2,3], [2,4]  // horizontal
+    ];
+    generateMiniBoard('mb-rook', rookMoves, 'fa-chess-rook');
+    
+    const knightMoves = [
+        [0,1], [0,3], [4,1], [4,3],
+        [1,0], [1,4], [3,0], [3,4]
+    ];
+    generateMiniBoard('mb-knight', knightMoves, 'fa-chess-knight');
+    
+    const bishopMoves = [
+        [0,0], [1,1], [3,3], [4,4], // diag 1
+        [0,4], [1,3], [3,1], [4,0]  // diag 2
+    ];
+    generateMiniBoard('mb-bishop', bishopMoves, 'fa-chess-bishop');
+    
+    const queenMoves = rookMoves.concat(bishopMoves);
+    generateMiniBoard('mb-queen', queenMoves, 'fa-chess-queen');
+    
+    const kingMoves = [
+        [1,1], [1,2], [1,3],
+        [2,1],        [2,3],
+        [3,1], [3,2], [3,3]
+    ];
+    generateMiniBoard('mb-king', kingMoves, 'fa-chess-king');
+    
+    boardsInitialized = true;
+}
+
+// Ensure boards are generated even if button not clicked, in case someone resizes or for smooth animation
+document.addEventListener('DOMContentLoaded', initMiniBoards);
+
 
 botWorker.onmessage = function(e) {
     const bestMove = e.data;

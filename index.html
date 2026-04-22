@@ -33,9 +33,14 @@
                     <option value="4" data-i18n="veryHard4">Çok Zor (Derinlik 4 - Yavaş)</option>
                 </select>
             </div>
-            <button id="startGameBtn" class="primary-btn">
-                <i class="fa-solid fa-play"></i> <span data-i18n="startGame">Oyuna Başla</span>
-            </button>
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <button id="howToPlayBtnStart" class="secondary-btn">
+                    <i class="fa-solid fa-book-open"></i> <span data-i18n="howToPlay">Nasıl Oynanır?</span>
+                </button>
+                <button id="startGameBtn" class="primary-btn">
+                    <i class="fa-solid fa-play"></i> <span data-i18n="startGame">Oyuna Başla</span>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -86,6 +91,10 @@
                 <div class="control-box">
                     <span data-i18n="language">Dil</span>
                     <button id="langToggleBtn" class="sidebar-btn"><i class="fa-solid fa-language"></i> <span id="langLabel">EN</span></button>
+                </div>
+                <div class="control-box">
+                    <span data-i18n="howToPlayTitle">Kurallar</span>
+                    <button id="howToPlayBtnSidebar" class="sidebar-btn"><i class="fa-solid fa-book-open"></i></button>
                 </div>
             </div>
 
@@ -173,6 +182,77 @@
         <div class="qr-popup">
             <button id="qrClose" class="qr-close" aria-label="Close">&times;</button>
             <img src="extended.png" alt="QR Code" class="qr-image">
+        </div>
+    </div>
+
+    <!-- How to Play Modal -->
+    <div id="htpOverlay" class="htp-overlay">
+        <div class="htp-modal">
+            <div class="htp-header">
+                <h2 data-i18n="htpTitle">Satranç Nasıl Oynanır?</h2>
+                <button id="htpClose" class="htp-close" aria-label="Close">&times;</button>
+            </div>
+            
+            <div class="htp-content">
+                <div class="htp-section">
+                    <h3 data-i18n="htpGoalTitle"><i class="fa-solid fa-trophy"></i> Oyunun Amacı</h3>
+                    <p data-i18n="htpGoalDesc">Oyunun amacı rakip şahı <strong>"mat"</strong> etmektir. Mat, şahın tehdit altında olması ve kaçacak güvenli hiçbir karesinin kalmaması durumudur.</p>
+                </div>
+
+                <div class="htp-section">
+                    <h3 data-i18n="htpPiecesTitle"><i class="fa-solid fa-chess-board"></i> Taşların Hareketleri</h3>
+                    <div class="htp-pieces-grid">
+                        <!-- Pawn -->
+                        <div class="htp-piece-card">
+                            <div class="mini-board" id="mb-pawn"></div>
+                            <div class="htp-piece-info">
+                                <h4 data-i18n="htpPawn">Piyon</h4>
+                                <p data-i18n="htpPawnDesc">İleriye bir kare gider. İlk hamlesinde iki kare gidebilir. Çaprazındaki taşı yer.</p>
+                            </div>
+                        </div>
+                        <!-- Rook -->
+                        <div class="htp-piece-card">
+                            <div class="mini-board" id="mb-rook"></div>
+                            <div class="htp-piece-info">
+                                <h4 data-i18n="htpRook">Kale</h4>
+                                <p data-i18n="htpRookDesc">Yatay ve dikey olarak istediği kadar gidebilir.</p>
+                            </div>
+                        </div>
+                        <!-- Knight -->
+                        <div class="htp-piece-card">
+                            <div class="mini-board" id="mb-knight"></div>
+                            <div class="htp-piece-info">
+                                <h4 data-i18n="htpKnight">At</h4>
+                                <p data-i18n="htpKnightDesc">"L" şeklinde hareket eder. Diğer taşların üzerinden atlayabilen tek taştır.</p>
+                            </div>
+                        </div>
+                        <!-- Bishop -->
+                        <div class="htp-piece-card">
+                            <div class="mini-board" id="mb-bishop"></div>
+                            <div class="htp-piece-info">
+                                <h4 data-i18n="htpBishop">Fil</h4>
+                                <p data-i18n="htpBishopDesc">Çapraz olarak istediği kadar gidebilir. Bulunduğu rengin dışına çıkamaz.</p>
+                            </div>
+                        </div>
+                        <!-- Queen -->
+                        <div class="htp-piece-card">
+                            <div class="mini-board" id="mb-queen"></div>
+                            <div class="htp-piece-info">
+                                <h4 data-i18n="htpQueen">Vezir</h4>
+                                <p data-i18n="htpQueenDesc">En güçlü taştır. Yatay, dikey ve çapraz olarak istediği kadar gidebilir.</p>
+                            </div>
+                        </div>
+                        <!-- King -->
+                        <div class="htp-piece-card">
+                            <div class="mini-board" id="mb-king"></div>
+                            <div class="htp-piece-info">
+                                <h4 data-i18n="htpKing">Şah</h4>
+                                <p data-i18n="htpKingDesc">En önemli taştır. Her yöne sadece bir kare gidebilir. Tehdit altındayken kaçmalıdır.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
