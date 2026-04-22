@@ -167,7 +167,12 @@ body {
     padding: 1.5rem;
     box-shadow: var(--shadow);
     border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow-y: auto;
 }
+
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
 
 .player-info {
     display: flex;
@@ -203,8 +208,8 @@ body {
 .sidebar-controls {
     display: flex;
     flex-direction: column;
-    gap: 1.2rem;
-    margin: 2rem 0;
+    gap: 0.8rem;
+    margin: auto 0;
 }
 
 .control-box {
@@ -1034,6 +1039,22 @@ body {
     border-radius: 50%;
     position: absolute;
     z-index: 1;
+}
+
+/* Special Rules Icon Container */
+.htp-special-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 110px;
+    height: 110px;
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    flex-shrink: 0;
+    font-size: 1.8rem;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
 }
 
 /* Secondary Button (for start screen) */

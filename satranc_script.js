@@ -58,6 +58,11 @@ const translations = {
         drawEnd: 'Oyun berabere bitti',
         playAgain: 'Yeniden Oyna',
         adjustDifficulty: 'Zorluğu Ayarla',
+        // Lo-Fi Player
+        lofiLive: 'Canlı (24/7)',
+        lofiPaused: 'Duraklatıldı',
+        lofiConnecting: 'Bağlanıyor...',
+        lofiError: 'Müzik başlatılamadı. Tarayıcı izni gerekiyor olabilir.',
         // How to Play
         howToPlay: 'Nasıl Oynanır?',
         howToPlayTitle: 'Kurallar',
@@ -76,7 +81,16 @@ const translations = {
         htpQueen: 'Vezir',
         htpQueenDesc: 'En güçlü taştır. Yatay, dikey ve çapraz olarak istediği kadar gidebilir.',
         htpKing: 'Şah',
-        htpKingDesc: 'En önemli taştır. Her yöne sadece bir kare gidebilir. Tehdit altındayken kaçmalıdır.'
+        htpKingDesc: 'En önemli taştır. Her yöne sadece bir kare gidebilir. Tehdit altındayken kaçmalıdır.',
+        htpSpecialRulesTitle: 'Özel Kurallar',
+        htpCastling: 'Rok (Castling)',
+        htpCastlingDesc: 'Şah ve kalenin aynı anda hareket ettiği tek hamledir. Şahı güvene almak için yapılır. Şah ile kalenin daha önce hiç oynamamış olması, aralarının boş olması ve şahın tehdit altında olmaması şarttır.',
+        htpEnPassant: 'Geçerken Alma (En Passant)',
+        htpEnPassantDesc: 'Rakip piyon ilk hamlesinde iki kare çıkıp sizin piyonunuzun yanına gelirse, onu sanki tek kare çıkmış gibi çapraz şekilde yiyebilirsiniz. Bu hak sadece o an için geçerlidir.',
+        htpPromotion: 'Piyon Terfisi (Promotion)',
+        htpPromotionDesc: 'Piyon, tahtanın karşı tarafındaki son satıra ulaşırsa istediğiniz bir taşa (Vezir, Kale, Fil veya At) dönüşür. Genellikle en güçlü taş olan Vezir seçilir.',
+        htpBoardSetupTitle: 'Satranç Tahtası Nasıl Dizilir?',
+        htpBoardSetupDesc: 'Tahtanın sağ alt köşesinde açık renkli bir kare bulunmalıdır. İlk sıraya dıştan içe doğru: Kaleler, Atlar ve Filler dizilir. Kalan iki kareden, Vezir kendi rengindeki kareye (beyaz vezir beyaz kareye, siyah vezir siyah kareye), Şah ise yanına yerleşir. Önlerindeki ikinci sıraya ise tamamen Piyonlar dizilir.'
     },
     en: {
         // Overlay
@@ -134,6 +148,11 @@ const translations = {
         drawEnd: 'Game ended in a draw',
         playAgain: 'Play Again',
         adjustDifficulty: 'Adjust Difficulty',
+        // Lo-Fi Player
+        lofiLive: 'Live (24/7)',
+        lofiPaused: 'Paused',
+        lofiConnecting: 'Connecting...',
+        lofiError: 'Could not start music. Browser permission may be required.',
         // How to Play
         howToPlay: 'How to Play?',
         howToPlayTitle: 'Rules',
@@ -152,7 +171,16 @@ const translations = {
         htpQueen: 'Queen',
         htpQueenDesc: 'The most powerful piece. Moves horizontally, vertically, and diagonally as far as it wants.',
         htpKing: 'King',
-        htpKingDesc: 'The most important piece. Moves only one square in any direction. Must escape when attacked.'
+        htpKingDesc: 'The most important piece. Moves only one square in any direction. Must escape when attacked.',
+        htpSpecialRulesTitle: 'Special Rules',
+        htpCastling: 'Castling',
+        htpCastlingDesc: 'A special move where the king and rook move simultaneously to secure the king. Allowed only if neither piece has moved before, the path is clear, and the king is not in check.',
+        htpEnPassant: 'En Passant',
+        htpEnPassantDesc: 'If an opponent\'s pawn moves two squares forward and lands beside your pawn, you can capture it diagonally as if it had only moved one square. This must be done immediately.',
+        htpPromotion: 'Pawn Promotion',
+        htpPromotionDesc: 'When a pawn reaches the opposite end of the board, it must be promoted to any piece (Queen, Rook, Bishop, or Knight). The Queen is usually chosen.',
+        htpBoardSetupTitle: 'How to Setup the Board?',
+        htpBoardSetupDesc: 'The bottom right corner must be a light square. From outside in: Rooks, Knights, and Bishops. The Queen goes on her own color (white Queen on white square, black Queen on black square), and the King goes next to her. The second row is filled entirely with Pawns.'
     }
 };
 
@@ -200,6 +228,16 @@ function applyLanguage() {
     }
     // Update html lang attribute
     document.documentElement.lang = currentLang === 'tr' ? 'tr' : 'en';
+
+    // Update lofi status text dynamically
+    const lofiStatus = document.getElementById('lofiStatus');
+    if (lofiStatus) {
+        if (typeof isLofiPlaying !== 'undefined' && isLofiPlaying) {
+            lofiStatus.textContent = t('lofiLive');
+        } else {
+            lofiStatus.textContent = t('lofiPaused');
+        }
+    }
 }
 
 // Variables
@@ -468,16 +506,16 @@ lofiPlayBtn.addEventListener('click', () => {
         lofiAudio.play().then(() => {
             isLofiPlaying = true;
             lofiPlayBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
-            lofiStatus.textContent = "Canlı (24/7)";
+            lofiStatus.textContent = t('lofiLive');
         }).catch(err => {
             console.error("Playback error:", err);
-            showToast("Müzik başlatılamadı. Tarayıcı izni gerekiyor olabilir.");
+            showToast(t('lofiError'));
         });
     } else {
         lofiAudio.pause();
         isLofiPlaying = false;
         lofiPlayBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
-        lofiStatus.textContent = "Duraklatıldı";
+        lofiStatus.textContent = t('lofiPaused');
     }
 });
 
@@ -487,10 +525,10 @@ lofiVolume.addEventListener('input', (e) => {
 
 // Optional buffering status handling
 lofiAudio.addEventListener('waiting', () => {
-    if (isLofiPlaying) lofiStatus.textContent = "Bağlanıyor...";
+    if (isLofiPlaying) lofiStatus.textContent = t('lofiConnecting');
 });
 lofiAudio.addEventListener('playing', () => {
-    if (isLofiPlaying) lofiStatus.textContent = "Canlı (24/7)";
+    if (isLofiPlaying) lofiStatus.textContent = t('lofiLive');
 });
 
 document.getElementById('inGameDifficulty').addEventListener('change', (e) => {
